@@ -38,6 +38,12 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/urls/{ShortKey}:
     delete:
       summary: Deletes a shortened URL
@@ -133,6 +139,12 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
           description: Conflict - Custom alias already in use
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
           content:
             application/problem+json:
               schema:
