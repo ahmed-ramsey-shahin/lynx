@@ -208,8 +208,65 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+  /api/auth/refresh:
+    post:
+      summary: Refreshes an access token
+      operationId: refreshToken
+      tags:
+        - User authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: OK - Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Bad Request - Invalid input (e.g. malformed token)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description:  Unauthorized - A token is invalid
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - The refresh token is valid but can not be used
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
+    RefreshTokenRequest:
+      type: object
+      properties:
+        expiredAccessToken:
+          type: string
+          description: The stateless JWT used to authenticate requests to other microservices.
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: A long-lived, opaque token used to acquire a new access token when the current one expires.
+          example: "d2948b8c-b026-46c5-a13f-84614a1fa342"
+      required:
+        - expiredAccessToken
+        - refreshToken
     TokenResponse:
       type: object
       properties:
