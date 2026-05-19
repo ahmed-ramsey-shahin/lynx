@@ -66,6 +66,15 @@ paths:
         - Link Management
       security:
         - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: A client-generated UUID used to safely retry requests without creating duplicate short links
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
       requestBody:
         required: true
         content:
