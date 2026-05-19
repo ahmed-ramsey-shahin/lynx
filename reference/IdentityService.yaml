@@ -7,6 +7,62 @@ servers:
   - url: http://localhost:8081
     description: Local Development Gateway
 paths:
+  /api/auth/users/{userId}/password:
+    put:
+      summary: Change user password
+      operationId: changeUserPassword
+      tags:
+        - User management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier of the user.
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '204':
+          description: No Content - Password updated successfully
+        '400':
+          description: Bad Request - Invalid input (e.g. malformed password)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description:  Unauthorized - Token is missing or invalid
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - You do not have permission to change this users's data
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found - No user was found with this ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/auth/login:
     post:
       summary: Login
@@ -113,6 +169,38 @@ components:
         - refreshToken
         - expiresAt
     LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: john_doe
+          minLength: 3
+          maxLength: 30
+        password:
+          type: string
+          example: VerySecure@Password123
+          minLength: 8
+          maxLength: 128
+      required:
+        - username
+        - password
+    ChangePasswordRequest:
+      type: object
+      properties:
+        newPassword:
+          type: string
+          example: VerySecure@NewPassword123
+          minLength: 8
+          maxLength: 128
+        oldPassword:
+          type: string
+          example: VerySecure@Password123
+          minLength: 8
+          maxLength: 128
+      required:
+        - newPassword
+        - oldPassword
+    ChangeUsernameRequest:
       type: object
       properties:
         username:
