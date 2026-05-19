@@ -2,11 +2,42 @@ openapi: 3.1.0
 info:
   version: 1.0.0
   title: RedirectionService - Redirection API
-  description: High-performance URL redirection and short link generation service.
+  description: High-performance URL redirection and short link generation service
 servers:
   - url: http://localhost:8080
     description: Local Development Gateway
 paths:
+  /{ShortKey}:
+    get:
+      summary: Redirect to the original long URL
+      description: Resolves the short key and returns a 302 redirected. This endpoint is public and tracks analytics asynchronously.
+      operationId: RedirectToLongUrl
+      tags:
+        - Redirection
+      parameters:
+        - name: ShortKey
+          in: path
+          required: true
+          description: The unique token/alias generated for the long URL.
+          schema:
+            type: string
+          example: "git-readme"
+      responses:
+        '302':
+          description: Found - Redirecting to the target long URL.
+          headers:
+            Location:
+              description: The actual destination URL.
+              schema:
+                type: string
+                format: uri
+              example: "https://github.com/git/git/blob/master/README.md"
+        '404':
+          description: Not Found - Short link does not exist or has expired
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/urls/{ShortKey}:
     delete:
       summary: Deletes a shortened URL
@@ -19,7 +50,7 @@ paths:
         - name: ShortKey
           in: path
           required: true
-          description: The unique alias of the URL to delete
+          description: The unique alias of the URL to delete.
           schema:
             type: string
             minLength: 4
@@ -27,7 +58,7 @@ paths:
           example: 'git-readme'
       responses:
         '204':
-          description: No Content - Successfully deleted the short URL
+          description: No Content - Successfully deleted the short URL.
         '400':
           description: Bad Request - Invalid short URL
           content:
@@ -70,7 +101,7 @@ paths:
         - name: Idempotency-Key
           in: header
           required: true
-          description: A client-generated UUID used to safely retry requests without creating duplicate short links
+          description: A client-generated UUID used to safely retry requests without creating duplicate short links.
           schema:
             type: string
             format: uuid
@@ -169,5 +200,5 @@ components:
   securitySchemes:
     bearerAuth:
       type: http
-      schema: bearer
+      scheme: bearer
       bearerFormat: JWT
