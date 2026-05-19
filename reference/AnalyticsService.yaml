@@ -58,6 +58,75 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
+    Metric:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the metric
+          example: Windows OS
+        clicks:
+          type: integer
+          description: The number of clicks
+          example: 15420
+      required:
+        - name
+        - clicks
+    TimeSeriesPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: The specific date for this data point.
+          example: "2026-05-19"
+        clicks:
+          type: integer
+          description: The number of clicks
+          example: 15420
+      required:
+        - date
+        - clicks
+    AnalyticsDetailsResponse:
+      type: object
+      properties:
+        timeSeries:
+          type: array
+          description: A chronological list of clicks over time for line charts
+          items:
+            $ref: '#/components/schemas/TimeSeriesPoint'
+        operatingSystems:
+          type: array
+          description: Clicks grouped by operating system for pie charts.
+          items:
+            $ref: '#/components/schemas/Metric'
+        browsers:
+          type: array
+          description: Clicks grouped by web browser for pie charts.
+          items:
+            $ref: '#/components/schemas/Metric'
+        deviceTypes:
+          type: array
+          description: Clicks grouped by device type (Mobile, Desktop, Tablet) for pie charts.
+          items:
+            $ref: '#/components/schemas/Metric'
+        countries:
+          type: array
+          description: Clicks grouped by country of origin for map visuals.
+          items:
+            $ref: '#/components/schemas/Metric'
+        referrers:
+          type: array
+          description: Clicks grouped by the source of the traffic for pie charts.
+          items:
+            $ref: '#/components/schemas/Metric'
+      required:
+        - timeSeries
+        - operatingSystems
+        - browsers
+        - deviceTypes
+        - countries
+        - referrers
     AnalyticsSummaryResponse:
       type: object
       properties:
