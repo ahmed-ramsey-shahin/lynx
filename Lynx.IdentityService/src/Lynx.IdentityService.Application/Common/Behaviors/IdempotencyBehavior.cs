@@ -24,7 +24,16 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Check cache for {RequestName} and {IdempotencyKey}.", typeof(TRequest).Name, idempotentCommand.IdempotencyKey);
 
-            var lockAcquired = await cacheService.TrySetAsync(idempotentCommand.IdempotencyKey, "InProgress", TimeSpan.FromMinutes(2), cancellationToken);
+            var cachedResult = await cacheService.GetAsync<TResponse>(idempotentCommand.IdempotencyKey, cancellationToken);
+
+            if (cachedResult is not null)
+            {
+                logger.LogInformation("Returned cached idempotent result.");
+                return cachedResult;
+            }
+
+            var lockKey = $"{idempotentCommand.IdempotencyKey}_lock";
+            var lockAcquired = await cacheService.TrySetAsync(lockKey, "InProgress", TimeSpan.FromMinutes(2), cancellationToken);
 
             if (!lockAcquired)
             {
@@ -44,7 +53,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
                 if (logger.IsEnabled(LogLevel.Error))
                     logger.LogError("An error happened during execution of the command. {@Errors}.", result.Errors);
 
-                await cacheService.RemoveAsync(idempotentCommand.IdempotencyKey, cancellationToken);
+                await cacheService.RemoveAsync(lockKey, cancellationToken);
                 return result;
             }
 
@@ -52,6 +61,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
                 logger.LogInformation("Storing {IdempotencyKey} to cache.", idempotentCommand.IdempotencyKey);
 
             await cacheService.SetAsync(idempotentCommand.IdempotencyKey, result, TimeSpan.FromMinutes(3), cancellationToken);
+            await cacheService.RemoveAsync(lockKey, cancellationToken);
             return result;
         }
     }
