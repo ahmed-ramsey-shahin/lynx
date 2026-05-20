@@ -115,6 +115,11 @@ namespace Lynx.IdentityService.Domain.Identity
             DateTimeOffset expiresOn
         )
         {
+            if (!IsActivated)
+            {
+                return UserErrors.NotActivated;
+            }
+
             var creationResult = RefreshToken.Create(token, expiresOn);
 
             if (creationResult.IsError)
@@ -128,6 +133,11 @@ namespace Lynx.IdentityService.Domain.Identity
 
         public Result<Updated> Revoke(string token, DateTimeOffset currentUtcTime)
         {
+            if (!IsActivated)
+            {
+                return UserErrors.NotActivated;
+            }
+
             var refreshToken = _refreshTokens.FirstOrDefault(refreshToken => refreshToken.Token.Equals(token));
 
             if (refreshToken is null)
@@ -147,6 +157,11 @@ namespace Lynx.IdentityService.Domain.Identity
 
         public Result<Updated> RevokeAllTokens(DateTimeOffset currentUtcTime)
         {
+            if (!IsActivated)
+            {
+                return UserErrors.NotActivated;
+            }
+
             foreach (var token in RefreshTokens)
             {
                 token.Revoke(currentUtcTime);
@@ -157,12 +172,22 @@ namespace Lynx.IdentityService.Domain.Identity
 
         public Result<Updated> RemoveExpiredRefreshTokens(DateTimeOffset currentUtcTime)
         {
+            if (!IsActivated)
+            {
+                return UserErrors.NotActivated;
+            }
+
             _refreshTokens.RemoveAll(token => token.ExpiresOn < currentUtcTime);
             return Result.Updated;
         }
 
         public Result<Updated> RemoveRefreshToken(string token)
         {
+            if (!IsActivated)
+            {
+                return UserErrors.NotActivated;
+            }
+
             _refreshTokens.RemoveAll(rtoken => rtoken.Token.Equals(token));
             return Result.Updated;
         }
