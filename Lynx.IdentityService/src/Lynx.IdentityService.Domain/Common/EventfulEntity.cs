@@ -1,6 +1,6 @@
 namespace Lynx.IdentityService.Domain.Common
 {
-    public abstract class EventfulEntity(TimeProvider provider) : AuditableEntity(provider)
+    public abstract class EventfulEntity : AuditableEntity
     {
         private readonly List<DomainEvent> _events = [];
         public IReadOnlyCollection<DomainEvent> Events => _events;

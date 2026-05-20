@@ -1,9 +1,10 @@
 namespace Lynx.IdentityService.Domain.Common
 {
-    public abstract class AuditableEntity(TimeProvider provider)
+    public abstract class AuditableEntity
     {
-        public DateTimeOffset CreatedAt { get; set; } = provider.GetUtcNow();
+        public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset? UpdatedAt { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
         public bool IsDeleted { get; set; }
     }
 }
