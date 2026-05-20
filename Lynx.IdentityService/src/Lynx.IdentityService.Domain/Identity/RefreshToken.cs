@@ -4,18 +4,15 @@ namespace Lynx.IdentityService.Domain.Identity
 {
     public sealed class RefreshToken
     {
-        public Guid Id { get; }
-        public string Token { get; } = string.Empty;
-        public Guid UserId { get; }
+        public string Id { get; }
+        public string Token { get; }
+        public string UserId { get; }
         public DateTimeOffset ExpiresOn { get; }
         public bool IsRevoked { get; private set; }
         public DateTimeOffset? RevokedAt { get; private set; }
         public bool IsValid => !IsRevoked && ExpiresOn > DateTimeOffset.UtcNow;
 
-        private RefreshToken()
-        {}
-
-        private RefreshToken(Guid id, string token, Guid userId, DateTimeOffset expiresOn)
+        private RefreshToken(string id, string token, string userId, DateTimeOffset expiresOn)
         {
             Id = id;
             Token = token;
@@ -24,9 +21,9 @@ namespace Lynx.IdentityService.Domain.Identity
             IsRevoked = false;
         }
 
-        public static Result<RefreshToken> Create(Guid id, string token, Guid userId, DateTimeOffset expiresOn)
+        public static Result<RefreshToken> Create(string id, string token, string userId, DateTimeOffset expiresOn)
         {
-            if (id == Guid.Empty)
+            if (string.IsNullOrEmpty(id))
             {
                 return RefreshTokenErrors.IdRequired;
             }
@@ -36,7 +33,7 @@ namespace Lynx.IdentityService.Domain.Identity
                 return RefreshTokenErrors.TokenRequired;
             }
 
-            if (userId == Guid.Empty)
+            if (string.IsNullOrEmpty(userId))
             {
                 return RefreshTokenErrors.UserIdRequired;
             }
