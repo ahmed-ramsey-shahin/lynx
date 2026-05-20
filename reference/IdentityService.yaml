@@ -127,7 +127,7 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
-  /api/auth/users/{userId}:
+  /api/auth/users/{username}:
     get:
       summary: Returns a user's data
       operationId: getUser
@@ -136,13 +136,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: userId
+        - name: username
           in: path
           required: true
-          description: The unique identifier of the user.
+          description: The unique username of the user.
           schema:
             type: string
-            example: "123e4567-e89b-12d3-a456-426614174000"
+            example: "lynx_user"
       responses:
         '200':
           description: OK - User found and returned
