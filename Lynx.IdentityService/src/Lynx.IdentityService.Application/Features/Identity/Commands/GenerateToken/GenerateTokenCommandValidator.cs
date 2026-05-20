@@ -2,11 +2,11 @@ using FluentValidation;
 using Lynx.IdentityService.Application.Common;
 using Lynx.IdentityService.Application.Common.Errors;
 
-namespace Lynx.IdentityService.Application.Features.Identity.Queries.GenerateToken
+namespace Lynx.IdentityService.Application.Features.Identity.Commands.GenerateToken
 {
-    public sealed class GenerateTokenQueryValidator : AbstractValidator<GenerateTokenQuery>
+    public sealed class GenerateTokenCommandValidator : AbstractValidator<GenerateTokenCommand>
     {
-        public GenerateTokenQueryValidator()
+        public GenerateTokenCommandValidator()
         {
             RuleFor(query => query.Username)
                 .Matches(ApplicationRegex.Username)

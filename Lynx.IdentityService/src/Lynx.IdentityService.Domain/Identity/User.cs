@@ -160,5 +160,11 @@ namespace Lynx.IdentityService.Domain.Identity
             _refreshTokens.RemoveAll(token => token.ExpiresOn < currentUtcTime);
             return Result.Updated;
         }
+
+        public Result<Updated> RemoveRefreshToken(string token)
+        {
+            _refreshTokens.RemoveAll(rtoken => rtoken.Token.Equals(token));
+            return Result.Updated;
+        }
     }
 }

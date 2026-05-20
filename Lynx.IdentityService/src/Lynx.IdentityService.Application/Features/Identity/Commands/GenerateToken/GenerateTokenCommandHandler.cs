@@ -6,17 +6,17 @@ using Lynx.IdentityService.Domain.Common.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Lynx.IdentityService.Application.Features.Identity.Queries.GenerateToken
+namespace Lynx.IdentityService.Application.Features.Identity.Commands.GenerateToken
 {
-    public sealed class GenerateTokenQueryHandler(
-        ILogger<GenerateTokenQueryHandler> logger,
+    public sealed class GenerateTokenCommandHandler(
+        ILogger<GenerateTokenCommandHandler> logger,
         ITokenProvider tokenProvider,
         IUserRepository userRepo,
         IPasswordHashingService hashingService,
         TimeProvider timeProvider
-    ) : IRequestHandler<GenerateTokenQuery, Result<TokenDto>>
+    ) : IRequestHandler<GenerateTokenCommand, Result<TokenDto>>
     {
-        public async Task<Result<TokenDto>> Handle(GenerateTokenQuery request, CancellationToken cancellationToken)
+        public async Task<Result<TokenDto>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
             var user = await userRepo.GetUserByUsernameAsync(request.Username, cancellationToken);
 
