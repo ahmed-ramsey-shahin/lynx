@@ -5,7 +5,7 @@ namespace Lynx.IdentityService.Domain.Identity
 {
     public sealed class User : EventfulEntity
     {
-        public string Id { get; }
+        public Guid Id { get; }
         public string Email { get; }
         public string Username { get; private set; }
         public string Password { get; private set; }
@@ -14,7 +14,7 @@ namespace Lynx.IdentityService.Domain.Identity
         private readonly List<RefreshToken> _refreshTokens = [];
         public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
-        private User(string id, string email, string username, string password)
+        private User(Guid id, string email, string username, string password)
         {
             Id = id;
             Email = email;
@@ -24,9 +24,9 @@ namespace Lynx.IdentityService.Domain.Identity
             ActivationDate = null;
         }
 
-        public static Result<User> Create(string id, string email, string username, string password)
+        public static Result<User> Create(Guid id, string email, string username, string password)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id == Guid.Empty)
             {
                 return UserErrors.IdRequired;
             }
@@ -111,12 +111,11 @@ namespace Lynx.IdentityService.Domain.Identity
         }
 
         public Result<RefreshToken> AddRefreshToken(
-            string id,
             string token,
             DateTimeOffset expiresOn
         )
         {
-            var creationResult = RefreshToken.Create(id, token, expiresOn);
+            var creationResult = RefreshToken.Create(token, expiresOn);
 
             if (creationResult.IsError)
             {
