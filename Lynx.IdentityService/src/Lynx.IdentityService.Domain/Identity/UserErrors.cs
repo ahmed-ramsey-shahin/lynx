@@ -9,6 +9,7 @@ namespace Lynx.IdentityService.Domain.Identity
         public static Error EmailRequired => Error.Validation("User.EmailRequired", "Email address is required.");
         public static Error UsernameRequired => Error.Validation("User.UsernameRequired", "Username address is required.");
         public static Error NotActivated => Error.Forbidden("User.NotActivated", "This operation cannot be performed because the user is not activated yet.");
-        public static Error AlreadyActivated => Error.Forbidden("User.AlreadyActivated", "This operation cannot be performed because the user is already activated.");
+        public static Error AlreadyActivated => Error.Conflict("User.AlreadyActivated", "This operation cannot be performed because the user is already activated.");
+        public static Error TokenNotFound => Error.NotFound("User.TokenNotFound", "The provided token does not exist.");
     }
 }

@@ -109,5 +109,41 @@ namespace Lynx.IdentityService.Domain.Identity
             AddEvent(new UserDeleted(Id));
             return Result.Deleted;
         }
+
+        public Result<RefreshToken> AddRefreshToken(
+            string id,
+            string token,
+            DateTimeOffset expiresOn
+        )
+        {
+            var creationResult = RefreshToken.Create(id, token, expiresOn);
+
+            if (creationResult.IsError)
+            {
+                return creationResult.Errors!;
+            }
+
+            _refreshTokens.Add(creationResult.Value);
+            return creationResult;
+        }
+
+        public Result<Updated> Revoke(string token, TimeProvider timeProvider)
+        {
+            var refreshToken = _refreshTokens.FirstOrDefault(refreshToken => refreshToken.Token.Equals(token));
+
+            if (refreshToken is null)
+            {
+                return UserErrors.TokenNotFound;
+            }
+
+            var revokeResult = refreshToken.Revoke(timeProvider);
+
+            if (revokeResult.IsError)
+            {
+                return revokeResult.Errors!;
+            }
+
+            return revokeResult;
+        }
     }
 }

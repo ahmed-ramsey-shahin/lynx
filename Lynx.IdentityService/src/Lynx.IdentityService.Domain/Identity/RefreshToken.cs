@@ -51,4 +51,4 @@ namespace Lynx.IdentityService.Domain.Identity
             return Result.Updated;
         }
     }
-    }
+}
