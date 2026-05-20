@@ -49,7 +49,7 @@ namespace Lynx.IdentityService.Domain.Identity
             return new RefreshToken(id, token, userId, expiresOn);
         }
 
-        public Result<Updated> Revoke()
+        public Result<Updated> Revoke(TimeProvider timeProvider)
         {
             if (IsRevoked)
             {
@@ -57,8 +57,8 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             IsRevoked = true;
-            RevokedAt = DateTimeOffset.UtcNow;
+            RevokedAt = timeProvider.GetUtcNow();
             return Result.Updated;
         }
     }
-}
+    }
