@@ -7,6 +7,62 @@ servers:
   - url: http://localhost:8081
     description: Local Development Gateway
 paths:
+  /api/auth/passwords/reset:
+    post:
+      summary: Reset a password using an OTP
+      description: Consumes the 6-digit code sent to the user's email to assign a new password.
+      operationId: resetPassword
+      tags:
+        - Password recovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '204':
+          description: No Content - Password reset successfully
+        '400':
+          description: Bad Request - Invalid input, or the OTP is incorrect/expired.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/auth/passwords/forgot:
+    post:
+      summary: Request a password reset
+      description: Initiates the password recovery process. Always returns a 202 Accepted to prevent user enumeration.
+      operationId: forgotPassword
+      tags:
+        - Password recovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '202':
+          description: Accepted - The request was processed successfully (no data returned for security)
+        '400':
+          description: Bad Request - Invalid Input (e.g. malformed email)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/auth/users/{userId}/deletions:
     post:
       summary: Deletes a user and all the short links they created
@@ -353,6 +409,37 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
+    ResetPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: my_email@lynx.com
+        code:
+          type: string
+          description: The 6-digit One-Time Password sent to the user's email.
+          minLength: 6
+          maxLength: 6
+          example: "849201"
+        newPassword:
+          type: string
+          example: VerySecure@NewPassword123
+          minLength: 8
+          maxLength: 128
+      required:
+        - email
+        - code
+        - newPassword
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: my_email@lynx.com
+      required:
+        - email
     DeleteUserRequest:
       type: object
       properties:
