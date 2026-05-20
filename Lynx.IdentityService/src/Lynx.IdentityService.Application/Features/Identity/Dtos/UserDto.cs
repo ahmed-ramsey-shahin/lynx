@@ -5,6 +5,5 @@ namespace Lynx.IdentityService.Application.Features.Identity.Dtos
         public Guid UserId { get; init; }
         public string Username { get; init; } = null!;
         public string Email { get; init; } = null!;
-        public string PasswordHash { get; init; } = null!;
     }
 }
