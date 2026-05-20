@@ -126,7 +126,7 @@ namespace Lynx.IdentityService.Domain.Identity
             return creationResult;
         }
 
-        public Result<Updated> Revoke(string token, TimeProvider timeProvider)
+        public Result<Updated> Revoke(string token, DateTimeOffset currentUtcTime)
         {
             var refreshToken = _refreshTokens.FirstOrDefault(refreshToken => refreshToken.Token.Equals(token));
 
@@ -135,7 +135,7 @@ namespace Lynx.IdentityService.Domain.Identity
                 return UserErrors.TokenNotFound;
             }
 
-            var revokeResult = refreshToken.Revoke(timeProvider);
+            var revokeResult = refreshToken.Revoke(currentUtcTime);
 
             if (revokeResult.IsError)
             {
@@ -143,6 +143,22 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             return revokeResult;
+        }
+
+        public Result<Updated> RevokeAllTokens(DateTimeOffset currentUtcTime)
+        {
+            foreach (var token in RefreshTokens)
+            {
+                token.Revoke(currentUtcTime);
+            }
+
+            return Result.Updated;
+        }
+
+        public Result<Updated> RemoveExpiredRefreshTokens(DateTimeOffset currentUtcTime)
+        {
+            _refreshTokens.RemoveAll(token => token.ExpiresOn < currentUtcTime);
+            return Result.Updated;
         }
     }
 }
