@@ -1,0 +1,40 @@
+services:
+  analytics-db:
+    image: influxdb:2
+    container_name: analytics-db
+    ports:
+      - "8086:8086"
+    volumes:
+      - analytics-db-data:/var/lib/influxdb2
+      - analytics-db-config:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_ORG=lynx
+      - DOCKER_INFLUXDB_INIT_BUCKET=lynx-bucket
+      - DOCKER_INFLUXDB_INIT_USERNAME=${ANALYTICS_DB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${ANALYTICS_DB_PASSWORD}
+    restart: unless-stopped
+    networks:
+      - lynx-net
+  users-db:
+    image: mongodb/mongodb-community-server:latest
+    container_name: users-db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${USERS_DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${USERS_DB_PASSWORD}
+    volumes:
+      - users-db-data:/data/db
+    restart: unless-stopped
+    networks:
+       - lynx-net
+
+volumes:
+  analytics-db-data:
+  analytics-db-config:
+  users-db-data:
+
+networks:
+  lynx-net:
+    driver: bridge
