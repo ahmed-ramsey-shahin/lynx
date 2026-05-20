@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPasswordReset
 {
-    public class RequestPasswordResetCommandHandler(
+    public sealed class RequestPasswordResetCommandHandler(
         IUserRepository userRepo,
         ILogger<RequestPasswordResetCommandHandler> logger,
         ICacheService cacheService,
@@ -42,6 +42,10 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
             );
 
             await Task.WhenAll(cacheWriteTask, emailTask);
+
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("OTP sent to {UserName} on {Email}.", user.Username, user.Email);
+
             return Result.Success;
         }
     }

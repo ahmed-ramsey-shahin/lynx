@@ -16,5 +16,6 @@ namespace Lynx.IdentityService.Application.Common.Errors
         public static Error RefreshTokenExpired => Error.Unauthorized("Auth.RefreshTokenExpired", "The refresh token has expired. Please log in again.");
         public static Error CredentialsInvalid => Error.Unauthorized("Auth.InvalidCredentials", "The provided email or password is incorrect.");
         public static Error UserNotActive => Error.Forbidden("User.NotActive", "This operation cannot be performed because the user is not active.");
+        public static Error OtpInvalid => Error.Validation("User.Invalid.Otp", "The OTP must be 6 characters.");
     }
 }
