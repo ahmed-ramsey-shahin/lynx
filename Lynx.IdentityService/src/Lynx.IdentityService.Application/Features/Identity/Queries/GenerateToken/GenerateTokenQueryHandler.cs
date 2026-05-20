@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Queries.GenerateToken
 {
-    public class GenerateTokenQueryHandler(
+    public sealed class GenerateTokenQueryHandler(
         ILogger<GenerateTokenQueryHandler> logger,
         ITokenProvider tokenProvider,
         IIdentityService identityService

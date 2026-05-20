@@ -4,7 +4,7 @@ using Lynx.IdentityService.Application.Common.Errors;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUserPassword
 {
-    public class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
+    public sealed class ChangeUserPasswordCommandValidator : AbstractValidator<ChangeUserPasswordCommand>
     {
         public ChangeUserPasswordCommandValidator()
         {

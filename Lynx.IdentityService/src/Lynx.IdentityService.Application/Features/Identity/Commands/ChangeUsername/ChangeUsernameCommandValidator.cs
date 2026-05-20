@@ -4,7 +4,7 @@ using Lynx.IdentityService.Application.Common.Errors;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUsername
 {
-    public class ChangeUsernameCommandValidator : AbstractValidator<ChangeUsernameCommand>
+    public sealed class ChangeUsernameCommandValidator : AbstractValidator<ChangeUsernameCommand>
     {
         public ChangeUsernameCommandValidator()
         {

@@ -4,7 +4,7 @@ using Lynx.IdentityService.Application.Common.Errors;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Queries.GenerateToken
 {
-    public class GenerateTokenQueryValidator : AbstractValidator<GenerateTokenQuery>
+    public sealed class GenerateTokenQueryValidator : AbstractValidator<GenerateTokenQuery>
     {
         public GenerateTokenQueryValidator()
         {

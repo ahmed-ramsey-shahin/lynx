@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUserPassword
 {
-    public class ChangeUserPasswordCommandHandler(
+    public sealed class ChangeUserPasswordCommandHandler(
         ILogger<ChangeUserPasswordCommandHandler> logger,
         IUserRepository userRepo,
         IPasswordHashingService hashingService

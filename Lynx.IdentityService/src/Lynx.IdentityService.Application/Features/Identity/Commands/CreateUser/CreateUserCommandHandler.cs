@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
 {
-    public class CreateUserCommandHandler(
+    public sealed class CreateUserCommandHandler(
         ILogger<CreateUserCommandHandler> logger,
         IUserRepository userRepo
     ) : IRequestHandler<CreateUserCommand, Result<Guid>>
