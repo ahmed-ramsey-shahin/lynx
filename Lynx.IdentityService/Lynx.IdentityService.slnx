@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lynx.IdentityService.Api/Lynx.IdentityService.Api.csproj" />
+    <Project Path="src/Lynx.IdentityService.Application/Lynx.IdentityService.Application.csproj" />
+    <Project Path="src/Lynx.IdentityService.Contracts/Lynx.IdentityService.Contracts.csproj" />
+    <Project Path="src/Lynx.IdentityService.Domain/Lynx.IdentityService.Domain.csproj" />
+    <Project Path="src/Lynx.IdentityService.Infrastructure/Lynx.IdentityService.Infrastructure.csproj" />
+  </Folder>
+</Solution>

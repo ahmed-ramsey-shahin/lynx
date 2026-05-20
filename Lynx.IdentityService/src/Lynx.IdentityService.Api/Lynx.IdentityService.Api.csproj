@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lynx.IdentityService.Application\Lynx.IdentityService.Application.csproj" />
+    <ProjectReference Include="..\Lynx.IdentityService.Infrastructure\Lynx.IdentityService.Infrastructure.csproj" />
+    <ProjectReference Include="..\Lynx.IdentityService.Contracts\Lynx.IdentityService.Contracts.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
