@@ -22,7 +22,6 @@ paths:
           description: The unique identifier of the user.
           schema:
             type: string
-            format: uuid
             example: "123e4567-e89b-12d3-a456-426614174000"
       requestBody:
         required: true
@@ -78,7 +77,6 @@ paths:
           description: The unique identifier of the user.
           schema:
             type: string
-            format: uuid
             example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
         '200':
@@ -132,7 +130,6 @@ paths:
           description: The unique identifier of the user.
           schema:
             type: string
-            format: uuid
             example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
         '204':
@@ -194,7 +191,6 @@ paths:
           description: The unique identifier of the user.
           schema:
             type: string
-            format: uuid
             example: "123e4567-e89b-12d3-a456-426614174000"
       responses:
         '204':
@@ -494,7 +490,6 @@ components:
       properties:
         id:
           type: string
-          format: uuid
           example: "123e4567-e89b-12d3-a456-426614174000"
     ProblemDetails:
       type: object
