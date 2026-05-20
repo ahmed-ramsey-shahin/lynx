@@ -10,7 +10,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
     public sealed class ChangeUsernameCommandHandler(
         ILogger<ChangeUsernameCommandHandler> logger,
         IUserRepository userRepo,
-        IPasswordHashingService hashingService
+        IPasswordHashingService hashingService,
+        ICacheService cacheService
     ) : IRequestHandler<ChangeUsernameCommand, Result<Updated>>
     {
         public async Task<Result<Updated>> Handle(ChangeUsernameCommand request, CancellationToken cancellationToken)
@@ -56,6 +57,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
             }
 
             await userRepo.UpdateAsync(user, cancellationToken);
+            await cacheService.RemoveAsync($"users:{user.Username}", cancellationToken);
             return Result.Updated;
         }
     }
