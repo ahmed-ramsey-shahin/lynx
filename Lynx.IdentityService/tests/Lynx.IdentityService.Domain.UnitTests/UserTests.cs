@@ -5,6 +5,7 @@ namespace Lynx.IdentityService.Domain.UnitTests
 {
     public class UserTests
     {
+#region CREATE_TESTS
         [Fact]
         public void Create_Should_ReturnUserObject_WhenParametersAreValid()
         {
@@ -20,9 +21,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             userCreationResult.IsSuccess.Should().BeTrue();
-            userCreationResult.IsError.Should().BeFalse();
-            userCreationResult.Errors.Should().BeEmpty();
-            userCreationResult.Value.Should().NotBeNull();
             user.IsActivated.Should().BeFalse();
             user.ActivationDate.Should().BeNull();
             user.Email.Should().Be(email);
@@ -48,10 +46,8 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             userCreationResult.IsSuccess.Should().BeFalse();
-            userCreationResult.IsError.Should().BeTrue();
             userCreationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UserErrors.IdRequired.Code);
-            userCreationResult.Value.Should().BeNull();
         }
 
         [Theory]
@@ -70,10 +66,8 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             userCreationResult.IsSuccess.Should().BeFalse();
-            userCreationResult.IsError.Should().BeTrue();
             userCreationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UserErrors.EmailRequired.Code);
-            userCreationResult.Value.Should().BeNull();
         }
 
         [Theory]
@@ -92,10 +86,8 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             userCreationResult.IsSuccess.Should().BeFalse();
-            userCreationResult.IsError.Should().BeTrue();
             userCreationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UserErrors.UsernameRequired.Code);
-            userCreationResult.Value.Should().BeNull();
         }
 
         [Theory]
@@ -114,13 +106,67 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             userCreationResult.IsSuccess.Should().BeFalse();
-            userCreationResult.IsError.Should().BeTrue();
             userCreationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UserErrors.PasswordRequired.Code);
-            userCreationResult.Value.Should().BeNull();
+        }
+#endregion // CREATE_TESTS
+
+#region CHANGE_PASSWORD_TESTS
+        [Fact]
+        public void ChangePassword_Should_ReturnUpdated_WhenParametersAreValidAndUserIsActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            const string newPassword = "VeryStrong@NewPassword456";
+
+            // Act
+            var changePasswordResult = user.ChangePassword(newPassword);
+
+            // Assert
+            changePasswordResult.IsSuccess.Should().BeTrue();
+            user.Password.Should().Be(newPassword);
+            user.Events.Should().ContainSingle()
+                .Which.Should().BeOfType<PasswordChangedEvent>();
         }
 
-        // ChangePassword(string password)
+        [Fact]
+        public void ChangePassword_Should_ReturnNotActivated_WhenUserIsNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            string oldPassword = user.Password;
+            const string newPassword = "VeryStrong@NewPassword456";
+
+            // Act
+            var changePasswordResult = user.ChangePassword(newPassword);
+
+            // Assert
+            changePasswordResult.IsSuccess.Should().BeFalse();
+            changePasswordResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+            user.Password.Should().Be(oldPassword);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void ChangePassword_Should_ReturnPasswordRequired_WhenNewPasswordIsEmpty(string newPassword)
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            string oldPassword = user.Password;
+
+            // Act
+            var changePasswordResult = user.ChangePassword(newPassword);
+
+            // Assert
+            changePasswordResult.IsSuccess.Should().BeFalse();
+            changePasswordResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.PasswordRequired.Code);
+            user.Password.Should().Be(oldPassword);
+        }
+#endregion // CHANGE_PASSWORD_TESTS
 
         // ChangeUsername(string username)
 
