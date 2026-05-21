@@ -1,4 +1,47 @@
 services:
+  rabbitmq-setup:
+    image: curlimages/curl:latest
+    container_name: rabbitmq-setup
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    networks:
+      - lynx-net
+    env_file: .env
+    command: >
+      sh -c '
+        sleep 10;
+
+        # 1. Identity Service (Write only)
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$IDENTITY_SVC_USER -d "{\"password\":\"$$IDENTITY_SVC_PASS\",\"tags\":\"\"}";
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$IDENTITY_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^\$$\",\"read\":\"^none\$$\"}";
+
+        # 2. Redirection Service (Read DeletedUsers, Write to ShortLinkVisits)
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$REDIRECTION_SVC_USER -d "{\"password\":\"$$REDIRECTION_SVC_PASS\",\"tags\":\"\"}";
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$REDIRECTION_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^\$$\",\"read\":\"^DeletedUsers\$$\"}";
+
+        # 3. Analytics Service (Read ShortLinkVisits only)
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$ANALYTICS_SVC_USER -d "{\"password\":\"$$ANALYTICS_SVC_PASS\",\"tags\":\"\"}";
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$ANALYTICS_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^none\$$\",\"read\":\"^ShortLinkVisits\$$\"}";
+
+        echo "All microservice permissions secured successfully!";
+      '
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - lynx-net
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
   analytics-db:
     image: influxdb:2
     container_name: analytics-db
@@ -13,6 +56,7 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=lynx-bucket
       - DOCKER_INFLUXDB_INIT_USERNAME=${ANALYTICS_DB_USERNAME}
       - DOCKER_INFLUXDB_INIT_PASSWORD=${ANALYTICS_DB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${ANALYTICS_DB_TOKEN}
     restart: unless-stopped
     networks:
       - lynx-net
@@ -34,6 +78,7 @@ volumes:
   analytics-db-data:
   analytics-db-config:
   users-db-data:
+  rabbitmq-data:
 
 networks:
   lynx-net:
