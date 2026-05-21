@@ -17,7 +17,9 @@ namespace Lynx.IdentityService.Application.Common.Errors
         public static Error CredentialsInvalid => Error.Unauthorized("Auth.InvalidCredentials", "The provided email or password is incorrect.");
         public static Error UserNotActive => Error.Forbidden("User.NotActive", "This operation cannot be performed because the user is not active.");
         public static Error OtpInvalid => Error.Validation("User.InvalidOtp", "The OTP must be 6 digits.");
+        public static Error ActivationCodeInvalid => Error.Validation("User.InvalidActivationCode", "The activation code must be 64 characters.");
         public static Error OtpExpired => Error.Forbidden("User.OtpExpired", "The provided OTP is invalid or expired.");
+        public static Error ActivationCodeExpired => Error.Forbidden("User.ActivationCodeExpired", "The provided activation code is invalid or expired.");
         public static Error DeletionNotConfirmed => Error.Forbidden("User.DeletionNotConfirmed", "You must explicitly confirm the deletion to permanently remove all your links and associated analytics.");
     }
 }
