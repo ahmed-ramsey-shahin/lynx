@@ -7,6 +7,40 @@ servers:
   - url: http://localhost:8081
     description: Local Development Gateway
 paths:
+  /api/auth/activations:
+    post:
+      summary: Activate a user account
+      description: Consumes the URL-safe activation token sent to the user's email to activate their account.
+      operationId: activateUser
+      tags:
+        - User management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateUserRequest'
+      responses:
+        '204':
+          description: No Content - Account activated successfully
+        '400':
+          description: Bad Request - Invalid input or the activation code has expired
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Not Found - The user tied to this token could not be found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /api/auth/password-resets:
     post:
       summary: Reset a password using an OTP
@@ -417,6 +451,15 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
+    ActivateUserRequest:
+      type: object
+      properties:
+        activationCode:
+          type: string
+          description: The URL-safe hex string activation code sent to the user's email.
+          example: "3f8a0b9e8c7d6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1"
+      required:
+        - code
     ResetPasswordRequest:
       type: object
       properties:
