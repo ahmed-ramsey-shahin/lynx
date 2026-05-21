@@ -47,7 +47,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             var user = new User(id, email, username, password);
-            user.AddEvent(new UserRegistered(id));
+            user.AddEvent(new UserRegisteredEvent(id));
             return user;
         }
 
@@ -64,7 +64,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             Password = password;
-            AddEvent(new PasswordChanged(Id));
+            AddEvent(new PasswordChangedEvent(Id));
             return Result.Updated;
         }
 
@@ -81,7 +81,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             Username = username;
-            AddEvent(new UsernameChanged(Id));
+            AddEvent(new UsernameChangedEvent(Id));
             return Result.Updated;
         }
 
@@ -94,7 +94,7 @@ namespace Lynx.IdentityService.Domain.Identity
 
             IsActivated = true;
             ActivationDate = activationDate;
-            AddEvent(new UserActivated(Id));
+            AddEvent(new UserActivatedEvent(Id));
             return Result.Updated;
         }
 
@@ -106,7 +106,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             IsDeleted = true;
-            AddEvent(new UserDeleted(Id));
+            AddEvent(new UserDeletedEvent(Id));
             return Result.Deleted;
         }
 

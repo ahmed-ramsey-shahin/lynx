@@ -31,7 +31,7 @@ namespace Lynx.IdentityService.Domain.UnitTests
             user.Id.Should().Be(id);
             user.RefreshTokens.Should().BeEmpty();
             user.Events.Should().ContainSingle()
-                .Which.Should().BeOfType<UserRegistered>();
+                .Which.Should().BeOfType<UserRegisteredEvent>();
         }
 
         [Fact]
