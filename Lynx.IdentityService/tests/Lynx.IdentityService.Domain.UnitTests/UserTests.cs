@@ -225,7 +225,43 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // CHANGE_USERNAME_TESTS
 
-        // Activate(DateTimeOffset activationDate)
+#region ACTIVATE_TESTS
+        [Fact]
+        public void Activate_Should_ReturnUpdatedAndEvent_IfNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            var activationTime = DateTimeOffset.UtcNow;
+
+            // Act
+            var activationResult = user.Activate(activationTime);
+
+            // Assert
+            activationResult.IsSuccess.Should().BeTrue();
+            user.IsActivated.Should().BeTrue();
+            user.ActivationDate.Should().Be(activationTime);
+            user.Events.Should().ContainSingle()
+                .Which.Should().BeOfType<UserActivatedEvent>();
+        }
+
+        [Fact]
+        public void Activate_Should_ReturnUpdatedAndNoEvent_IfActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            var oldActivationTime = user.ActivationDate;
+            var newActivationTime = DateTimeOffset.UtcNow.AddMinutes(15);
+
+            // Act
+            var activationResult = user.Activate(newActivationTime);
+
+            // Assert
+            activationResult.IsSuccess.Should().BeTrue();
+            user.IsActivated.Should().BeTrue();
+            user.ActivationDate.Should().Be(oldActivationTime);
+            user.Events.Should().BeEmpty();
+        }
+#endregion // ACTIVATE_TESTS
 
         // Delete()
 
