@@ -25,7 +25,16 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ActivateUs
                 return ApplicationErrors.ActivationCodeExpired;
             }
 
-            var user = (await userRepo.GetUserByIdAsync(userId.Value, cancellationToken))!;
+            var user = await userRepo.GetUserByIdAsync(userId.Value, cancellationToken);
+
+            if (user is null)
+            {
+                if (logger.IsEnabled(LogLevel.Error))
+                    logger.LogError("Critical mismatch: User ID {UserId} was found in cache but missing from the database.", userId.Value);
+
+                return ApplicationErrors.UserNotFound;
+            }
+
             var activationResult = user.Activate(timeProvider.GetUtcNow());
 
             if (activationResult.IsError)
