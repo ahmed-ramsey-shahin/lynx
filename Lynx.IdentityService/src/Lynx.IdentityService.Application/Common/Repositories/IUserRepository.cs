@@ -11,5 +11,6 @@ namespace Lynx.IdentityService.Application.Common.Repositories
         Task<bool> IsUsernameUniqueAsync(string username, CancellationToken cancellationToken=default);
         Task<bool> AddAsync(User user, CancellationToken cancellationToken=default);
         Task<bool> UpdateAsync(User user, CancellationToken cancellationToken=default);
+        Task<int> DeleteUnactivatedUsersAsync(DateTimeOffset maxCreationDate, CancellationToken cancellationToken=default);
     }
 }
