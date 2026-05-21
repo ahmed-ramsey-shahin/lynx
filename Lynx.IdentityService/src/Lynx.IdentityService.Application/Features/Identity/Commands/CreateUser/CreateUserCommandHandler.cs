@@ -1,15 +1,21 @@
 using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
+using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Domain.Common.Results;
 using Lynx.IdentityService.Domain.Identity;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
 {
     public sealed class CreateUserCommandHandler(
         ILogger<CreateUserCommandHandler> logger,
-        IUserRepository userRepo
+        IUserRepository userRepo,
+        IOTPGeneratorService generatorService,
+        IEmailService emailService,
+        ICacheService cacheService,
+        IConfiguration config
     ) : IRequestHandler<CreateUserCommand, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -32,7 +38,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
                 return ApplicationErrors.UsernameAlreadyExists;
             }
 
-            var creationResult = User.Create(Guid.NewGuid(), request.Email, request.Username, request.Password);
+            var userId = Guid.NewGuid();
+            var creationResult = User.Create(userId, request.Email, request.Username, request.Password);
 
             if (creationResult.IsError)
             {
@@ -43,6 +50,16 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
             }
 
             await userRepo.AddAsync(creationResult.Value, cancellationToken);
+            var activationToken = generatorService.GenerateUrlSafeToken();
+            await emailService.SendEmailAsync(
+                request.Email,
+                request.Username,
+                "Lynx Account Activation",
+                $@"Please visit ${config["ActivateAccountUrl"]} to activate your account.
+                The activation code is: {activationToken}.",
+                cancellationToken
+            );
+            await cacheService.SetAsync($"activation-codes:{activationToken}", userId, TimeSpan.FromHours(2), cancellationToken);
             return creationResult.Value.Id;
         }
     }
