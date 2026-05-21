@@ -85,7 +85,7 @@ namespace Lynx.IdentityService.Domain.Identity
             return Result.Updated;
         }
 
-        public Result<Updated> Activate(TimeProvider timeProvider)
+        public Result<Updated> Activate(DateTimeOffset activationDate)
         {
             if (IsActivated)
             {
@@ -93,7 +93,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             IsActivated = true;
-            ActivationDate = timeProvider.GetUtcNow();
+            ActivationDate = activationDate;
             AddEvent(new UserActivated(Id));
             return Result.Updated;
         }
