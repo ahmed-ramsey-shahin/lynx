@@ -20,9 +20,9 @@ services:
         curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$REDIRECTION_SVC_USER -d "{\"password\":\"$$REDIRECTION_SVC_PASS\",\"tags\":\"\"}";
         curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$REDIRECTION_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^\$$\",\"read\":\"^DeletedUsers\$$\"}";
 
-        # 3. Analytics Service (Read ShortLinkVisits only)
+        # 3. Analytics Service (Read DeletedUsers, Read ShortLinkVisits)
         curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$ANALYTICS_SVC_USER -d "{\"password\":\"$$ANALYTICS_SVC_PASS\",\"tags\":\"\"}";
-        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$ANALYTICS_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^none\$$\",\"read\":\"^ShortLinkVisits\$$\"}";
+        curl -s -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$ANALYTICS_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^none\$$\",\"read\":\"^(ShortLinkVisits|DeletedUsers)\$$\"}";
 
         echo "All microservice permissions secured successfully!";
       '
