@@ -31,17 +31,17 @@ namespace Lynx.IdentityService.Domain.Identity
                 return UserErrors.IdRequired;
             }
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return UserErrors.EmailRequired;
             }
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return UserErrors.UsernameRequired;
             }
 
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password))
             {
                 return UserErrors.PasswordRequired;
             }
@@ -58,7 +58,7 @@ namespace Lynx.IdentityService.Domain.Identity
                 return UserErrors.NotActivated;
             }
 
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password))
             {
                 return UserErrors.PasswordRequired;
             }
@@ -75,7 +75,7 @@ namespace Lynx.IdentityService.Domain.Identity
                 return UserErrors.NotActivated;
             }
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrWhiteSpace(username))
             {
                 return UserErrors.UsernameRequired;
             }
