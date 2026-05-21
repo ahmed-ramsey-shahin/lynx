@@ -6,7 +6,7 @@ namespace Lynx.IdentityService.Application.Common.Repositories
     {
         Task<User?> GetUserByIdAsync(Guid Id, CancellationToken cancellationToken=default);
         Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken=default);
-        Task<User?> GetUserByEmailAsync(string emaiil, CancellationToken cancellationToken=default);
+        Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken=default);
         Task<bool> IsEmailUniqueAsync(string email, CancellationToken cancellationToken=default);
         Task<bool> IsUsernameUniqueAsync(string username, CancellationToken cancellationToken=default);
         Task<bool> AddAsync(User user, CancellationToken cancellationToken=default);

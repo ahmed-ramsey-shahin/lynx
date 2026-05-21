@@ -19,8 +19,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.PasswordRe
                 .WithMessage(ApplicationErrors.PasswordInvalid.Description);
 
             RuleFor(command => command.Code)
-                .MaximumLength(6)
-                .MinimumLength(6)
+                .Matches("^[0-9]{6}$")
                 .WithErrorCode(ApplicationErrors.OtpInvalid.Code)
                 .WithMessage(ApplicationErrors.OtpInvalid.Description);
         }
