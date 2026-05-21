@@ -168,7 +168,62 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // CHANGE_PASSWORD_TESTS
 
-        // ChangeUsername(string username)
+#region CHANGE_USERNAME_TESTS
+        [Fact]
+        public void ChangeUsername_Should_ReturnUpdated_WhenParametersAreValidAndUserIsActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            const string newUsername = "new_lynx_user";
+
+            // Act
+            var changeUsernameResult = user.ChangeUsername(newUsername);
+
+            // Assert
+            changeUsernameResult.IsSuccess.Should().BeTrue();
+            user.Username.Should().Be(newUsername);
+            user.Events.Should().ContainSingle()
+                .Which.Should().BeOfType<UsernameChangedEvent>();
+        }
+
+        [Fact]
+        public void ChangeUsername_Should_ReturnNotActivated_WhenUserIsNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            string oldUsername = user.Username;
+            const string newUsername = "new_lynx_user";
+
+            // Act
+            var changeUsernameResult = user.ChangeUsername(newUsername);
+
+            // Assert
+            changeUsernameResult.IsSuccess.Should().BeFalse();
+            changeUsernameResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+            user.Username.Should().Be(oldUsername);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void ChangeUsername_Should_ReturnUsernameRequired_WhenNewUsernameIsEmpty(string newUsername)
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            string oldUsername = user.Username;
+
+            // Act
+            var changeUsernameResult = user.ChangeUsername(newUsername);
+
+            // Assert
+            changeUsernameResult.IsSuccess.Should().BeFalse();
+            changeUsernameResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.UsernameRequired.Code);
+            user.Username.Should().Be(oldUsername);
+        }
+#endregion // CHANGE_USERNAME_TESTS
 
         // Activate(DateTimeOffset activationDate)
 
