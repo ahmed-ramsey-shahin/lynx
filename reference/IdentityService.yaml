@@ -456,12 +456,12 @@ components:
           example: VerySecure@Password123
           minLength: 8
           maxLength: 128
-        didUserConfirm:
+        hasConfirmed:
           type: boolean
           description: A flag to check that the user confirmed to delete all the short links he created and their analytics
       required:
         - password
-        - didUserConfirm
+        - hasConfirmed
     GetUserResponse:
       type: object
       properties:
