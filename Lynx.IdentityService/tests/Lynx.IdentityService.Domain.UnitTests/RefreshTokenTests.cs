@@ -15,10 +15,10 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Act
             var creationResult = RefreshToken.Create(tokenString, expiresOn);
+            var refreshToken = creationResult.Value;
 
             // Assert
             creationResult.IsSuccess.Should().BeTrue();
-            var refreshToken = creationResult.Value;
             refreshToken.Token.Should().Be(tokenString);
             refreshToken.ExpiresOn.Should().Be(expiresOn);
             refreshToken.IsRevoked.Should().BeFalse();
@@ -40,7 +40,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             creationResult.IsSuccess.Should().BeFalse();
-            creationResult.IsError.Should().BeTrue();
             creationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(RefreshTokenErrors.TokenRequired.Code);
         }
@@ -57,7 +56,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             creationResult.IsSuccess.Should().BeFalse();
-            creationResult.IsError.Should().BeTrue();
             creationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(RefreshTokenErrors.ExpirationInvalid.Code);
         }
@@ -77,11 +75,10 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             revokeResult.IsSuccess.Should().BeTrue();
-            revokeResult.IsError.Should().BeFalse();
-            revokeResult.Errors.Should().BeEmpty();
             revokeResult.Value.Should().Be(Result.Updated);
             refreshToken.IsRevoked.Should().BeTrue();
             refreshToken.RevokedAt.Should().Be(revokeTime);
+            refreshToken.IsValid.Should().BeFalse();
         }
 
         [Fact]
@@ -101,11 +98,10 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             // Assert
             revokeResult.IsSuccess.Should().BeTrue();
-            revokeResult.IsError.Should().BeFalse();
-            revokeResult.Errors.Should().BeEmpty();
             revokeResult.Value.Should().Be(Result.Updated);
             refreshToken.IsRevoked.Should().BeTrue();
             refreshToken.RevokedAt.Should().Be(revokeTime);
+            refreshToken.IsValid.Should().BeFalse();
         }
     }
 }
