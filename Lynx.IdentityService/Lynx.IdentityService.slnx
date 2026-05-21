@@ -6,4 +6,8 @@
     <Project Path="src/Lynx.IdentityService.Domain/Lynx.IdentityService.Domain.csproj" />
     <Project Path="src/Lynx.IdentityService.Infrastructure/Lynx.IdentityService.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lynx.IdentityService.Application.UnitTests/Lynx.IdentityService.Application.UnitTests.csproj" />
+    <Project Path="tests/Lynx.IdentityService.Domain.UnitTests/Lynx.IdentityService.Domain.UnitTests.csproj" />
+  </Folder>
 </Solution>
