@@ -263,7 +263,41 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // ACTIVATE_TESTS
 
-        // Delete()
+#region DELETE_TESTS
+        [Fact]
+        public void Delete_Should_MarkUserAsDeleted_WhenUserIsActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            var deletionTime = DateTimeOffset.UtcNow;
+
+            // Act
+            var deletionResult = user.Delete(deletionTime);
+
+            // Assert
+            deletionResult.IsSuccess.Should().BeTrue();
+            user.IsDeleted.Should().BeTrue();
+            user.DeletedAt.Should().Be(deletionTime);
+            user.Events.Should().ContainSingle()
+                .Which.Should().BeOfType<UserDeletedEvent>();
+        }
+
+        [Fact]
+        public void Delete_Should_ReturnNoActivated_WhenUserIsNotActivate()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            var deletionTime = DateTimeOffset.UtcNow;
+
+            // Act
+            var deletionResult = user.Delete(deletionTime);
+
+            // Assert
+            deletionResult.IsSuccess.Should().BeFalse();
+            deletionResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+        }
+#endregion // DELETE_TESTS
 
         // AddRefreshToken(string token, DateTimeOffset expiresOn)
 

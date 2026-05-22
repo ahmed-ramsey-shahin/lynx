@@ -98,7 +98,7 @@ namespace Lynx.IdentityService.Domain.Identity
             return Result.Updated;
         }
 
-        public Result<Deleted> Delete()
+        public Result<Deleted> Delete(DateTimeOffset deletedAt)
         {
             if (!IsActivated)
             {
@@ -106,6 +106,7 @@ namespace Lynx.IdentityService.Domain.Identity
             }
 
             IsDeleted = true;
+            DeletedAt = deletedAt;
             AddEvent(new UserDeletedEvent(Id));
             return Result.Deleted;
         }
