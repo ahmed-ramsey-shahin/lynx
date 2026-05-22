@@ -89,7 +89,7 @@ namespace Lynx.IdentityService.Domain.Identity
         {
             if (IsActivated)
             {
-                return UserErrors.AlreadyActivated;
+                return Result.Updated;
             }
 
             IsActivated = true;
