@@ -13,7 +13,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser
         ILogger<DeleteUserCommandHandler> logger,
         IUserRepository userRepo,
         IMessagePublishingService publishingService,
-        ICacheService cacheService
+        ICacheService cacheService,
+        TimeProvider timeProvider
     ) : IRequestHandler<DeleteUserCommand, Result<Deleted>>
     {
         public async Task<Result<Deleted>> Handle(
@@ -45,7 +46,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser
                 return ApplicationErrors.InvalidOldPassword;
             }
 
-            var deleteResult = user.Delete();
+            var deleteResult = user.Delete(timeProvider.GetUtcNow());
 
             if (deleteResult.IsError)
             {
