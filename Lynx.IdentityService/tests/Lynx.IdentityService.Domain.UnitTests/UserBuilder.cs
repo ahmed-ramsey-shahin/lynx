@@ -28,7 +28,7 @@ namespace Lynx.IdentityService.Domain.UnitTests
 
             for (int i = 0; i < numberOfTokens; i++)
             {
-                _user.AddRefreshToken($"RandomToken{numberOfTokens}", expirationDate.Value);
+                _user.AddRefreshToken($"RandomToken{_user.RefreshTokens.Count + 1}", expirationDate.Value);
             }
 
             return this;

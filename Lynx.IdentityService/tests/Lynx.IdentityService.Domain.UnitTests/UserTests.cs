@@ -409,7 +409,7 @@ namespace Lynx.IdentityService.Domain.UnitTests
             // Act
             var removeResult = user.RemoveExpiredRefreshTokens(now);
 
-            // Asserta
+            // Assert
             removeResult.IsSuccess.Should().BeTrue();
             var refreshTokens = user.RefreshTokens.Should().NotBeEmpty()
                 .And.HaveCount(numberOfActiveTokens)
@@ -426,13 +426,91 @@ namespace Lynx.IdentityService.Domain.UnitTests
             // Act
             var removeResult = user.RemoveExpiredRefreshTokens(now);
 
-            // Asserta
+            // Assert
             removeResult.IsSuccess.Should().BeFalse();
             removeResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UserErrors.NotActivated.Code);
         }
 #endregion // REMOVE_EXPIRED_REFRESH_TOKENS_TESTS
 
-        // RemoveRefreshToken(string token)
+#region REMOVE_REFRESH_TOKEN
+        [Fact]
+        public void RemoveRefreshToken_Should_ReturnUpdated_WhenActivatedAndTokenIsExpired()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            const int numberOfExpiredTokens = 5;
+            const int numberOfActiveTokens = 3;
+            var fiveMinutesAgo = DateTimeOffset.UtcNow.AddMinutes(-5);
+            var fiveMinutesLater = DateTimeOffset.UtcNow.AddMinutes(5);
+            var user = new UserBuilder()
+                .Activated()
+                .HasRefreshTokens(numberOfExpiredTokens, fiveMinutesAgo)
+                .HasRefreshTokens(numberOfActiveTokens, fiveMinutesLater)
+                .Build();
+            var tokenToDelete = user.RefreshTokens.Where(token => token.ExpiresOn < now)
+                .Select(token => token.Token)
+                .First();
+
+            // Act
+            var removeResult = user.RemoveRefreshToken(tokenToDelete);
+
+            // Assert
+            removeResult.IsSuccess.Should().BeTrue();
+            user.RefreshTokens.Should().HaveCount(numberOfActiveTokens + numberOfExpiredTokens - 1);
+            user.RefreshTokens.Should().NotContain(token => token.Token.Equals(tokenToDelete));
+            var activeTokens = user.RefreshTokens.Where(token => token.ExpiresOn > now);
+            var expiredTokens = user.RefreshTokens.Where(token => token.ExpiresOn < now);
+            activeTokens.Should().NotBeEmpty().And.HaveCount(numberOfActiveTokens);
+            expiredTokens.Should().NotBeEmpty().And.HaveCount(numberOfExpiredTokens - 1);
+        }
+
+        [Fact]
+        public void RemoveRefreshToken_Should_ReturnUpdated_WhenActivatedAndTokenIsActive()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            const int numberOfExpiredTokens = 5;
+            const int numberOfActiveTokens = 3;
+            var fiveMinutesAgo = DateTimeOffset.UtcNow.AddMinutes(-5);
+            var fiveMinutesLater = DateTimeOffset.UtcNow.AddMinutes(5);
+            var user = new UserBuilder()
+                .Activated()
+                .HasRefreshTokens(numberOfExpiredTokens, fiveMinutesAgo)
+                .HasRefreshTokens(numberOfActiveTokens, fiveMinutesLater)
+                .Build();
+            var tokenToDelete = user.RefreshTokens.Where(token => token.ExpiresOn > now)
+                .Select(token => token.Token)
+                .First();
+
+            // Act
+            var removeResult = user.RemoveRefreshToken(tokenToDelete);
+
+            // Assert
+            removeResult.IsSuccess.Should().BeTrue();
+            user.RefreshTokens.Should().HaveCount(numberOfActiveTokens + numberOfExpiredTokens - 1);
+            user.RefreshTokens.Should().NotContain(token => token.Token.Equals(tokenToDelete));
+            var activeTokens = user.RefreshTokens.Where(token => token.ExpiresOn > now);
+            var expiredTokens = user.RefreshTokens.Where(token => token.ExpiresOn < now);
+            activeTokens.Should().NotBeEmpty().And.HaveCount(numberOfActiveTokens - 1);
+            expiredTokens.Should().NotBeEmpty().And.HaveCount(numberOfExpiredTokens);
+        }
+
+        [Fact]
+        public void RemoveRefreshToken_Should_ReturnNotActivated_WhenNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            const string tokenToRemove = "RandomToken";
+
+            // Act
+            var removeResult = user.RemoveRefreshToken(tokenToRemove);
+
+            // Assert
+            removeResult.IsSuccess.Should().BeFalse();
+            removeResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+        }
+#endregion // REMOVE_REFRESH_TOKEN
     }
 }
