@@ -53,6 +53,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
                 return ApplicationErrors.UsernameAlreadyExists;
             }
 
+            var oldUsername = user.Username;
             var changeUsernameResult = user.ChangeUsername(request.NewUsername);
 
             if (changeUsernameResult.IsError)
@@ -64,7 +65,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
             }
 
             await userRepo.UpdateAsync(user, cancellationToken);
-            await cacheService.RemoveAsync($"users:{user.Username}", cancellationToken);
+            await cacheService.RemoveAsync($"users:{oldUsername}", cancellationToken);
             return Result.Updated;
         }
     }
