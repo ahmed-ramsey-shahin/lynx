@@ -299,7 +299,61 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // DELETE_TESTS
 
-        // AddRefreshToken(string token, DateTimeOffset expiresOn)
+#region ADD_REFRESH_TOKEN_TESTS
+        [Fact]
+        public void AddRefreshToken_Should_ReturnUpdated_WhenActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            const string token = "RandomToken";
+            DateTimeOffset expiresOn = DateTimeOffset.UtcNow.AddMinutes(15);
+
+            // Act
+            var additionResult = user.AddRefreshToken(token, expiresOn);
+
+            // Assert
+            additionResult.IsSuccess.Should().BeTrue();
+            var addedToken = user.RefreshTokens.Should().ContainSingle().Which;
+            addedToken.Token.Should().Be(token);
+            addedToken.ExpiresOn.Should().Be(expiresOn);
+        }
+
+        [Fact]
+        public void AddRefreshToken_Should_ReturnNotActivated_WhenNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            const string token = "RandomToken";
+            DateTimeOffset expiresOn = DateTimeOffset.UtcNow.AddMinutes(15);
+
+            // Act
+            var additionResult = user.AddRefreshToken(token, expiresOn);
+
+            // Assert
+            additionResult.IsSuccess.Should().BeFalse();
+            additionResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+            user.RefreshTokens.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void AddRefreshToken_Should_ReturnCreationError_WhenTokenDataIsInvalid()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().Build();
+            const string token = "";
+            var expiresOn = DateTimeOffset.UtcNow;
+
+            // Act
+            var additionResult = user.AddRefreshToken(token, expiresOn);
+
+            // Assert
+            additionResult.IsSuccess.Should().BeFalse();
+            additionResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(RefreshTokenErrors.TokenRequired.Code);
+            user.RefreshTokens.Should().BeEmpty();
+        }
+#endregion // ADD_REFRESH_TOKEN_TESTS
 
         // Revoke(string token, DateTimeOffset currnetUtcTime)
 
