@@ -13,7 +13,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
             Mock.Setup(service => service.PublishAsync(
                 It.Is<string>(v => queue == null || queue == v),
                 It.Is<T>(v => body == null || body.Equals(v))
-            ));
+            )).Returns(Task.CompletedTask);
             return this;
         }
     }
