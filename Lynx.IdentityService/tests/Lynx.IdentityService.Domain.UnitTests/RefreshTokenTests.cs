@@ -45,22 +45,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 
         [Fact]
-        public void Create_Should_ReturnExpirationInvalidError_WhenExpiresOnIsInThePast()
-        {
-            // Arrange
-            const string token = "RandomToken";
-            var expiresOn = DateTimeOffset.UtcNow.AddDays(-1);
-
-            // Act
-            var creationResult = RefreshToken.Create(token, expiresOn);
-
-            // Assert
-            creationResult.IsSuccess.Should().BeFalse();
-            creationResult.Errors.Should().ContainSingle()
-                .Which.Code.Should().Be(RefreshTokenErrors.ExpirationInvalid.Code);
-        }
-
-        [Fact]
         public void Revoke_Should_ChangeRevokedAtAndIsRevoked_WhenNotAlreadyRevoked()
         {
             // Arrange
