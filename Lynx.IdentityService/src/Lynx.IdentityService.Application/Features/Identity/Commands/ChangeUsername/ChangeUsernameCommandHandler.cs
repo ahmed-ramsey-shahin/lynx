@@ -41,19 +41,19 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
                 return ApplicationErrors.InvalidOldPassword;
             }
 
-            if (string.Equals(request.Username, user.Username))
+            if (string.Equals(request.NewUsername, user.Username))
             {
                 return Result.Updated;
             }
 
-            if (!await userRepo.IsUsernameUniqueAsync(request.Username, cancellationToken))
+            if (!await userRepo.IsUsernameUniqueAsync(request.NewUsername, cancellationToken))
             {
                 if (logger.IsEnabled(LogLevel.Warning))
-                    logger.LogWarning("Request could not be processed {Username} is not unique.", request.Username);
+                    logger.LogWarning("Request could not be processed {Username} is not unique.", request.NewUsername);
                 return ApplicationErrors.UsernameAlreadyExists;
             }
 
-            var changeUsernameResult = user.ChangeUsername(request.Username);
+            var changeUsernameResult = user.ChangeUsername(request.NewUsername);
 
             if (changeUsernameResult.IsError)
             {

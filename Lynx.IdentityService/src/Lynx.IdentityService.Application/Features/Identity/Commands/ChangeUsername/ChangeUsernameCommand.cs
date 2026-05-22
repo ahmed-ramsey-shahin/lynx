@@ -6,7 +6,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
     public sealed record ChangeUsernameCommand : IRequest<Result<Updated>>
     {
         public Guid UserId { get; init; }
-        public string Username { get; init; } = null!;
+        public string NewUsername { get; init; } = null!;
         public string Password { get; init; } = null!;
     }
 }

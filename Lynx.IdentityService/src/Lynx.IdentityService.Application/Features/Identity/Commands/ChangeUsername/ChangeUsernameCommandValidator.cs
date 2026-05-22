@@ -13,7 +13,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
                 .WithErrorCode(ApplicationErrors.PasswordInvalid.Code)
                 .WithMessage(ApplicationErrors.PasswordInvalid.Description);
 
-            RuleFor(command => command.Username)
+            RuleFor(command => command.NewUsername)
                 .Matches(ApplicationRegex.Username)
                 .WithErrorCode(ApplicationErrors.UsernameInvalid.Code)
                 .WithMessage(ApplicationErrors.UsernameInvalid.Description);
