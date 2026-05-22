@@ -13,7 +13,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
             Mock.Setup(service => service.SetAsync(
                 It.IsAny<string>(),
                 It.IsAny<T>(),
-                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()
             )).Returns(Task.CompletedTask);
             return this;
@@ -42,7 +42,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
             Mock.Setup(service => service.TrySetAsync(
                 It.IsAny<string>(),
                 It.IsAny<T>(),
-                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()
             )).ReturnsAsync(true);
             return this;
@@ -53,7 +53,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
             Mock.Setup(service => service.TrySetAsync(
                 It.IsAny<string>(),
                 It.IsAny<T>(),
-                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()
             )).ReturnsAsync(false);
             return this;

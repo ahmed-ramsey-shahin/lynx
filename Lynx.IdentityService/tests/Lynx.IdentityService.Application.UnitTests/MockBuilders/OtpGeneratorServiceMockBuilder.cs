@@ -16,10 +16,10 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
             return this;
         }
 
-        public OtpGeneratorServiceMockBuilder WithGenerateUrlSafeToken(string? result, int length=6)
+        public OtpGeneratorServiceMockBuilder WithGenerateUrlSafeToken(string? result)
         {
             Mock.Setup(service => service.GenerateUrlSafeToken(
-                length
+                It.IsAny<int>()
             )).Returns(result ?? string.Empty);
             return this;
         }
