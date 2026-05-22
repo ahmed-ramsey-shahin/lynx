@@ -34,25 +34,25 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.GenerateTo
                 return ApplicationErrors.CredentialsInvalid;
             }
 
-            var generateTokenResult = await tokenProvider.GenerateJwtTokenAsync(new UserDto
+            var generatedToken = tokenProvider.GenerateJwtToken(new UserDto
             {
                 Username = user.Username,
                 Email = user.Email,
                 UserId = user.Id
             }, cancellationToken);
 
-            if (generateTokenResult.IsError)
+            if (generatedToken is null)
             {
                 if (logger.IsEnabled(LogLevel.Error))
-                    logger.LogError("Could not generate token for {Username}. {@Errors}.", request.Username, generateTokenResult.Errors);
+                    logger.LogError("Could not generate token for {Username}.", request.Username);
 
-                return generateTokenResult.Errors!;
+                return ApplicationErrors.TokenGenerationFailed;
             }
 
             user.RemoveExpiredRefreshTokens(timeProvider.GetUtcNow());
-            user.AddRefreshToken(generateTokenResult.Value.RefreshToken, generateTokenResult.Value.ExpiresAt);
+            user.AddRefreshToken(generatedToken.RefreshToken, generatedToken.ExpiresAt);
             await userRepo.UpdateAsync(user, cancellationToken);
-            return generateTokenResult;
+            return generatedToken;
         }
     }
 }

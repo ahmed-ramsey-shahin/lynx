@@ -22,5 +22,6 @@ namespace Lynx.IdentityService.Application.Common.Errors
         public static Error ActivationCodeExpired => Error.Forbidden("User.ActivationCodeExpired", "The provided activation code is invalid or expired.");
         public static Error DeletionNotConfirmed => Error.Forbidden("User.DeletionNotConfirmed", "You must explicitly confirm the deletion to permanently remove all your links and associated analytics.");
         public static Error UserNotOwned => Error.Forbidden("User.NotOwned", "You do not have permission to access this user.");
+        public static Error TokenGenerationFailed => Error.Failure("User.TokenGenerationFailed", "Could not generate the token.");
     }
 }
