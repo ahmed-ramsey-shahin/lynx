@@ -25,7 +25,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (elapsedMilliseconds > 500)
             {
                 var requestName = typeof(TRequest).Name;
-                var userId = userService.UserId ?? string.Empty;
+                var userId = userService.UserId ?? Guid.Empty;
 
                 if (logger.IsEnabled(LogLevel.Warning))
                     logger.LogWarning("Long event request: {Name} ({ElapsedMilliseconds} milliseconds) {UserId} {@Request}.", requestName, elapsedMilliseconds, userId, request);

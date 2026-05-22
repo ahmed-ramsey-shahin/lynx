@@ -68,6 +68,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 user.Id == userId), It.IsAny<CancellationToken>()), Times.Once());
             cache.Mock.Verify(service => service.GetAsync<Guid?>(cacheKey, It.IsAny<CancellationToken>()), Times.Once());
             cache.Mock.Verify(service => service.RemoveAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once());
+            user.IsActivated.Should().BeTrue();
         }
 
         [Fact]
