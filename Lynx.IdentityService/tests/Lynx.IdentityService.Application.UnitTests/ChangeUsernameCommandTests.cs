@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUsername;
@@ -48,16 +49,13 @@ namespace Lynx.IdentityService.Application.UnitTests
             };
             var user = User.Create(userId, "user@lynx.com", oldUsername, passwordHash).Value;
             user.Activate(DateTimeOffset.UtcNow);
-            var hashing = new PasswordHashingServiceMockBuilder()
-                .WithSuccessfulVerify(password, passwordHash);
+            var hashing = new PasswordHashingServiceMockBuilder().WithSuccessfulVerify(password, passwordHash);
             var userRepo = new UserRepositoryMockBuilder()
                 .WithUserById(userId, user)
                 .WithSuccessfulDatabaseUpdate()
                 .WithUniqueUsername(newUsername);
-            var cacheService = new CacheServiceMockBuilder()
-                .WithSuccessfulRemove(cacheKey);
-            var userService = new UserServiceMockBuilder()
-                .WithId(userId);
+            var cacheService = new CacheServiceMockBuilder().WithSuccessfulRemove(cacheKey);
+            var userService = new UserServiceMockBuilder().WithId(userId);
             CreateHandler(userRepo.Object, hashing.Object, cacheService.Object, userService.Object);
 
             // Act
@@ -75,6 +73,152 @@ namespace Lynx.IdentityService.Application.UnitTests
             userRepo.Mock.Verify(repo => repo.IsUsernameUniqueAsync(newUsername, It.IsAny<CancellationToken>()), Times.Once());
             cacheService.Mock.Verify(service => service.RemoveAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once());
             user.Username.Should().Be(newUsername);
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnInvalidOldPassword_WhenOldPasswordIsWrong()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            const string newUsername = "very_creative_and_cool_new_username";
+            const string oldUsername = "very_boring_old_username";
+            const string password = "MyVeryStrongInvalidPassword@Lynx123";
+            const string passwordHash = "MyVeryStrongOriginalPassword@Lynx123_AfterHashing";
+            string cacheKey = $"users:{oldUsername}";
+            var request = new ChangeUsernameCommand()
+            {
+                UserId = userId,
+                Password = password,
+                NewUsername = newUsername
+            };
+            var user = User.Create(userId, "user@lynx.com", oldUsername, passwordHash).Value;
+            user.Activate(DateTimeOffset.UtcNow);
+            var hashing = new PasswordHashingServiceMockBuilder().WithFailedVerify(password, passwordHash);
+            var userRepo = new UserRepositoryMockBuilder()
+                .WithUniqueUsername(newUsername)
+                .WithUserById(userId, user);
+            var cacheService = new CacheServiceMockBuilder();
+            var userService = new UserServiceMockBuilder().WithId(userId);
+            CreateHandler(userRepo.Object, hashing.Object, cacheService.Object, userService.Object);
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.InvalidOldPassword.Code);
+            userRepo.Mock.Verify(repo => repo.GetUserByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once());
+            hashing.Mock.Verify(service => service.Verify(password, passwordHash), Times.Once());
+            user.Username.Should().Be(oldUsername);
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnUsernameAlreadyExists_WhenUsernameIsNotUnique()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            const string newUsername = "very_creative_and_cool_new_username";
+            const string oldUsername = "very_boring_old_username";
+            const string password = "MyVeryStrongOldPassword@Lynx123";
+            const string passwordHash = "MyVeryStrongOldPassword@Lynx123_AfterHashing";
+            string cacheKey = $"users:{oldUsername}";
+            var request = new ChangeUsernameCommand()
+            {
+                UserId = userId,
+                Password = password,
+                NewUsername = newUsername
+            };
+            var user = User.Create(userId, "user@lynx.com", oldUsername, passwordHash).Value;
+            user.Activate(DateTimeOffset.UtcNow);
+            var hashing = new PasswordHashingServiceMockBuilder().WithSuccessfulVerify(password, passwordHash);
+            var userRepo = new UserRepositoryMockBuilder()
+                .WithUserById(userId, user)
+                .WithDuplicateUsername(newUsername);
+            var cacheService = new CacheServiceMockBuilder();
+            var userService = new UserServiceMockBuilder().WithId(userId);
+            CreateHandler(userRepo.Object, hashing.Object, cacheService.Object, userService.Object);
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.UsernameAlreadyExists.Code);
+            userRepo.Mock.Verify(repo => repo.GetUserByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once());
+            userRepo.Mock.Verify(repo => repo.IsUsernameUniqueAsync(newUsername, It.IsAny<CancellationToken>()), Times.Once());
+            user.Username.Should().Be(oldUsername);
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnNotFound_WhenUserIdIsWrong()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            const string newUsername = "very_creative_and_cool_new_username";
+            const string oldUsername = "very_boring_old_username";
+            const string password = "MyVeryStrongOldPassword@Lynx123";
+            string cacheKey = $"users:{oldUsername}";
+            var request = new ChangeUsernameCommand()
+            {
+                UserId = userId,
+                Password = password,
+                NewUsername = newUsername
+            };
+            var hashing = new PasswordHashingServiceMockBuilder();
+            var userRepo = new UserRepositoryMockBuilder()
+                .WithUserById(userId, null)
+                .WithUniqueUsername(newUsername);
+            var cacheService = new CacheServiceMockBuilder();
+            var userService = new UserServiceMockBuilder().WithId(userId);
+            CreateHandler(userRepo.Object, hashing.Object, cacheService.Object, userService.Object);
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.UserNotFound.Code);
+            userRepo.Mock.Verify(repo => repo.GetUserByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnUserNotOwned_WhenUserIdIsDifferentThanAuthenticatedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            const string newUsername = "very_creative_and_cool_new_username";
+            const string oldUsername = "very_boring_old_username";
+            const string password = "MyVeryStrongOldPassword@Lynx123";
+            const string passwordHash = "MyVeryStrongOldPassword@Lynx123_AfterHashing";
+            string cacheKey = $"users:{oldUsername}";
+            var request = new ChangeUsernameCommand()
+            {
+                UserId = userId,
+                Password = password,
+                NewUsername = newUsername
+            };
+            var user = User.Create(userId, "user@lynx.com", oldUsername, passwordHash).Value;
+            user.Activate(DateTimeOffset.UtcNow);
+            var hashing = new PasswordHashingServiceMockBuilder().WithSuccessfulVerify(password, passwordHash);
+            var userRepo = new UserRepositoryMockBuilder()
+                .WithUserById(userId, user)
+                .WithUniqueUsername(newUsername);
+            var cacheService = new CacheServiceMockBuilder();
+            var userService = new UserServiceMockBuilder().WithId(Guid.NewGuid());
+            CreateHandler(userRepo.Object, hashing.Object, cacheService.Object, userService.Object);
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.UserNotOwned.Code);
+            userService.Mock.Verify(service => service.UserId, Times.AtLeastOnce());
+            user.Username.Should().Be(oldUsername);
         }
     }
 }
