@@ -1,5 +1,6 @@
 using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
+using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Features.Identity.Dtos;
 using Lynx.IdentityService.Domain.Common.Results;
 using MediatR;
@@ -9,7 +10,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Queries.GetUser
 {
     public sealed class GetUserQueryHandler(
         ILogger<GetUserQueryHandler> logger,
-        IUserRepository userRepo
+        IUserRepository userRepo,
+        IUserService userService
     ) : IRequestHandler<GetUserQuery, Result<UserDto>>
     {
         public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
@@ -22,6 +24,12 @@ namespace Lynx.IdentityService.Application.Features.Identity.Queries.GetUser
                     logger.LogInformation("No user was found with {Username}.", request.Username);
 
                 return ApplicationErrors.UserNotFound;
+            }
+
+            if (userService.UserId != user.Id)
+            {
+                logger.LogWarning("Could not complete request the authenticated user");
+                return ApplicationErrors.UserNotOwned;
             }
 
             return new UserDto
