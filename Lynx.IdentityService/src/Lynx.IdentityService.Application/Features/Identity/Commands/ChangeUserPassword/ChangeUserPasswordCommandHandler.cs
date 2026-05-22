@@ -10,7 +10,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
     public sealed class ChangeUserPasswordCommandHandler(
         ILogger<ChangeUserPasswordCommandHandler> logger,
         IUserRepository userRepo,
-        IPasswordHashingService hashingService
+        IPasswordHashingService hashingService,
+        IUserService userService
     ) : IRequestHandler<ChangeUserPasswordCommand, Result<Updated>>
     {
         public async Task<Result<Updated>> Handle(ChangeUserPasswordCommand request, CancellationToken cancellationToken)
@@ -23,6 +24,12 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUser
                     logger.LogError("No user was found with {UserId}.", request.UserId);
 
                 return ApplicationErrors.UserNotFound;
+            }
+
+            if (user.Id != userService.UserId)
+            {
+                logger.LogWarning("Could not complete request the authenticated user");
+                return ApplicationErrors.UserNotOwned;
             }
 
             if (!hashingService.Verify(request.OldPassword, user.Password))

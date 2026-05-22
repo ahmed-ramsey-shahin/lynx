@@ -14,7 +14,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser
         IUserRepository userRepo,
         IMessagePublishingService publishingService,
         ICacheService cacheService,
-        TimeProvider timeProvider
+        TimeProvider timeProvider,
+        IUserService userService
     ) : IRequestHandler<DeleteUserCommand, Result<Deleted>>
     {
         public async Task<Result<Deleted>> Handle(
@@ -36,6 +37,12 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser
                     logger.LogError("No user was found with {UserId}.", request.UserId);
 
                 return ApplicationErrors.UserNotFound;
+            }
+
+            if (user.Id != userService.UserId)
+            {
+                logger.LogWarning("Could not complete request the authenticated user");
+                return ApplicationErrors.UserNotOwned;
             }
 
             if (!hashingService.Verify(request.Password, user.Password))
