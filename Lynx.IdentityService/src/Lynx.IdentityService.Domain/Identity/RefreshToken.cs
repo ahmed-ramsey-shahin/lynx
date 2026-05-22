@@ -24,11 +24,6 @@ namespace Lynx.IdentityService.Domain.Identity
                 return RefreshTokenErrors.TokenRequired;
             }
 
-            if (expiresOn <= DateTimeOffset.UtcNow)
-            {
-                return RefreshTokenErrors.ExpirationInvalid;
-            }
-
             return new RefreshToken(token, expiresOn);
         }
 

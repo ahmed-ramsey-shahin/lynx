@@ -139,7 +139,7 @@ namespace Lynx.IdentityService.Domain.Identity
                 return UserErrors.NotActivated;
             }
 
-            foreach (var token in RefreshTokens)
+            foreach (var token in RefreshTokens.Where(token => !token.IsRevoked))
             {
                 token.Revoke(currentUtcTime);
             }

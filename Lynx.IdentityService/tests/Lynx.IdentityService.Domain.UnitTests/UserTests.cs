@@ -355,9 +355,40 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // ADD_REFRESH_TOKEN_TESTS
 
-        // Revoke(string token, DateTimeOffset currnetUtcTime)
+#region REVOKE_ALL_TOKENS
+        [Fact]
+        public void RevokeAllTokens_Should_ReturnUpdated_WhenActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Activated().HasRefreshTokens().Build();
+            var revokeTime = DateTimeOffset.UtcNow;
 
-        // RevokeAllTokens(DateTimeOffset currnetUtcTime)
+            // Act
+            var revokeResult = user.RevokeAllTokens(revokeTime);
+
+            // Assert
+            revokeResult.IsSuccess.Should().BeTrue();
+            user.RefreshTokens.Should().NotBeEmpty()
+                .And.OnlyContain(token => token.IsRevoked)
+                .And.OnlyContain(token => token.RevokedAt == revokeTime);
+        }
+
+        [Fact]
+        public void RevokeAllTokens_Should_ReturnNotActivated_WhenNotActivated()
+        {
+            // Arrange
+            var user = new UserBuilder().Build();
+            var revokeTime = DateTimeOffset.UtcNow;
+
+            // Act
+            var revokeResult = user.RevokeAllTokens(revokeTime);
+
+            // Assert
+            revokeResult.IsSuccess.Should().BeFalse();
+            revokeResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+        }
+#endregion // REVOKE_ALL_TOKENS
 
         // RemoveExpiredRefreshTokens(DateTimeOffset currentUtcTime)
 

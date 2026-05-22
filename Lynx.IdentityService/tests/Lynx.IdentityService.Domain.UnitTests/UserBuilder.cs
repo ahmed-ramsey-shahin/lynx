@@ -22,6 +22,16 @@ namespace Lynx.IdentityService.Domain.UnitTests
             return this;
         }
 
+        public UserBuilder HasRefreshTokens(int numberOfTokens=10)
+        {
+            for (int i = 0; i < numberOfTokens; i++)
+            {
+                _user.AddRefreshToken($"RandomToken{numberOfTokens}", DateTimeOffset.UtcNow);
+            }
+
+            return this;
+        }
+
         public User Build()
         {
             _user.ClearEvents();
