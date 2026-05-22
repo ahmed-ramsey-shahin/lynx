@@ -16,7 +16,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
         IOTPGeneratorService generatorService,
         IEmailService emailService,
         ICacheService cacheService,
-        IOptions<ClientUrlOptions> options
+        IOptions<ClientUrlOptions> options,
+        IPasswordHashingService hashingService
     ) : IRequestHandler<CreateUserCommand, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -40,7 +41,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
             }
 
             var userId = Guid.NewGuid();
-            var creationResult = User.Create(userId, request.Email, request.Username, request.Password);
+            var hashedPassword = hashingService.Hash(request.Password);
+            var creationResult = User.Create(userId, request.Email, request.Username, hashedPassword);
 
             if (creationResult.IsError)
             {
