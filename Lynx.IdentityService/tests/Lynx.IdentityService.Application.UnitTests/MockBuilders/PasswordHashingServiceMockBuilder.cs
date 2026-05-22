@@ -11,7 +11,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
         public PasswordHashingServiceMockBuilder WithSuccessfulHash(string @out, string? @in=null)
         {
             Mock.Setup(service => service.Hash(
-                @in ?? It.IsAny<string>()
+                It.Is<string>(v => @in == null || @in== v)
             )).Returns(@out);
             return this;
         }
@@ -19,8 +19,8 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
         public PasswordHashingServiceMockBuilder WithSuccessfulVerify(string? password=null, string? hash=null)
         {
             Mock.Setup(service => service.Verify(
-                password ?? It.IsAny<string>(),
-                hash ?? It.IsAny<string>()
+                It.Is<string>(v => password == null || password == v),
+                It.Is<string>(v => hash == null || hash == v)
             )).Returns(true);
             return this;
         }
@@ -28,8 +28,8 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
         public PasswordHashingServiceMockBuilder WithFailedVerify(string? password=null, string? hash=null)
         {
             Mock.Setup(service => service.Verify(
-                password ?? It.IsAny<string>(),
-                hash ?? It.IsAny<string>()
+                It.Is<string>(v => password == null || password == v),
+                It.Is<string>(v => hash == null || hash == v)
             )).Returns(false);
             return this;
         }

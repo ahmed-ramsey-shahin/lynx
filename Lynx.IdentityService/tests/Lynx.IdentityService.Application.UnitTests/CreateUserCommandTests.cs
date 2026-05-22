@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
@@ -107,6 +108,123 @@ namespace Lynx.IdentityService.Application.UnitTests
                 user.Password == passwordHash &&
                 user.Username == username
             ), It.IsAny<CancellationToken>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnEmailAlreadyExists_WhenEmailIsNotUnique()
+        {
+            // Arrange
+            const string username = "lynx_user";
+            const string password = "VeryStrong@Password123";
+            const string email = "user@lynx.com";
+            const string idempotencyKey = "VeryRandomIdempotencyKey123";
+            CreateUserCommand request = new()
+            {
+                Email = email,
+                IdempotencyKey = idempotencyKey,
+                Password = password,
+                Username = username
+            };
+            var userRepoMock = new UserRepositoryMockBuilder()
+                .WithDuplicateEmail(email)
+                .WithUniqueUsername(username);
+            var otpMock = new OtpGeneratorServiceMockBuilder();
+            var cacheMock = new CacheServiceMockBuilder();
+            var emailMock = new EmailServiceMockBuilder();
+            var passwordHashMock = new PasswordHashingServiceMockBuilder();
+            CreateHandler(
+                userRepoMock.Object,
+                otpMock.Object,
+                emailMock.Object,
+                cacheMock.Object,
+                passwordHashMock.Object
+            );
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.EmailAlreadyExists.Code);
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnUsernameAlreadyExists_WhenUsernameIsNotUnique()
+        {
+            // Arrange
+            const string username = "lynx_user";
+            const string password = "VeryStrong@Password123";
+            const string email = "user@lynx.com";
+            const string idempotencyKey = "VeryRandomIdempotencyKey123";
+            CreateUserCommand request = new()
+            {
+                Email = email,
+                IdempotencyKey = idempotencyKey,
+                Password = password,
+                Username = username
+            };
+            var userRepoMock = new UserRepositoryMockBuilder()
+                .WithUniqueEmail(email)
+                .WithDuplicateUsername(username);
+            var otpMock = new OtpGeneratorServiceMockBuilder().WithGenerateUrlSafeToken("");
+            var cacheMock = new CacheServiceMockBuilder();
+            var emailMock = new EmailServiceMockBuilder();
+            var passwordHashMock = new PasswordHashingServiceMockBuilder().WithSuccessfulHash("");
+            CreateHandler(
+                userRepoMock.Object,
+                otpMock.Object,
+                emailMock.Object,
+                cacheMock.Object,
+                passwordHashMock.Object
+            );
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(ApplicationErrors.UsernameAlreadyExists.Code);
+        }
+
+        [Fact]
+        public async Task Handler_Should_ReturnErrors_WhenUserCreateReturnsAnError()
+        {
+            // Arrange
+            const string username = "";
+            const string password = "VeryStrong@Password123";
+            const string email = "user@lynx.com";
+            const string idempotencyKey = "VeryRandomIdempotencyKey123";
+            CreateUserCommand request = new()
+            {
+                Email = email,
+                IdempotencyKey = idempotencyKey,
+                Password = password,
+                Username = username
+            };
+            var userRepoMock = new UserRepositoryMockBuilder()
+                .WithUniqueEmail(email)
+                .WithUniqueUsername(username);
+            var otpMock = new OtpGeneratorServiceMockBuilder().WithGenerateUrlSafeToken("");
+            var cacheMock = new CacheServiceMockBuilder();
+            var emailMock = new EmailServiceMockBuilder();
+            var passwordHashMock = new PasswordHashingServiceMockBuilder().WithSuccessfulHash("");
+            CreateHandler(
+                userRepoMock.Object,
+                otpMock.Object,
+                emailMock.Object,
+                cacheMock.Object,
+                passwordHashMock.Object
+            );
+
+            // Act
+            var result = await _handler!.Handle(request, default);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.UsernameRequired.Code);
         }
     }
 }

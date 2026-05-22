@@ -22,7 +22,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
         public CacheServiceMockBuilder WithSuccessfulGet<T>(string? key=null, T? returnValue=default)
         {
             Mock.Setup(service => service.GetAsync<T>(
-                key ?? It.IsAny<string>(),
+                It.Is<string>(v => key == null || key == v),
                 It.IsAny<CancellationToken>()
             )).ReturnsAsync(returnValue);
             return this;
@@ -31,7 +31,7 @@ namespace Lynx.IdentityService.Application.UnitTests.MockBuilders
         public CacheServiceMockBuilder WithSuccessfulRemove(string? key=null)
         {
             Mock.Setup(service => service.RemoveAsync(
-                key ?? It.IsAny<string>(),
+                It.Is<string>(v => key == null || key == v),
                 It.IsAny<CancellationToken>()
             )).Returns(Task.CompletedTask);
             return this;
