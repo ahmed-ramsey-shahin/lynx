@@ -199,7 +199,6 @@ namespace Lynx.IdentityService.Application.UnitTests
             const string password = "VeryStrongPassword";
             const string passwordHash = "VeryStrongPassword_AfterHashing";
             const string username = "lynx_user";
-            string cacheKey = $"users:{username}";
             const bool hasConfirmed = false;
             var request = new DeleteUserCommand()
             {
