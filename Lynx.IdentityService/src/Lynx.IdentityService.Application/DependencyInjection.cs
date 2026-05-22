@@ -1,13 +1,15 @@
 using System.Reflection;
 using FluentValidation;
 using Lynx.IdentityService.Application.Common.Behaviors;
+using Lynx.IdentityService.Application.Common.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lynx.IdentityService.Application
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApplicationLayer(this IServiceCollection services)
+        public static IServiceCollection AddApplicationLayer(this IServiceCollection services, IConfiguration config)
         {
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddMediatR(configuration =>
@@ -20,6 +22,7 @@ namespace Lynx.IdentityService.Application
                 configuration.AddOpenBehavior(typeof(IdempotencyBehavior<,>));
                 configuration.AddOpenBehavior(typeof(CachingBehavior<,>));
             });
+            services.Configure<ClientUrlOptions>(config.GetSection(ClientUrlOptions.SectionName));
             return services;
         }
     }
