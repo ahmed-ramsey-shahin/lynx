@@ -132,30 +132,6 @@ namespace Lynx.IdentityService.Domain.Identity
             return creationResult;
         }
 
-        public Result<Updated> Revoke(string token, DateTimeOffset currentUtcTime)
-        {
-            if (!IsActivated)
-            {
-                return UserErrors.NotActivated;
-            }
-
-            var refreshToken = _refreshTokens.FirstOrDefault(refreshToken => refreshToken.Token.Equals(token));
-
-            if (refreshToken is null)
-            {
-                return UserErrors.TokenNotFound;
-            }
-
-            var revokeResult = refreshToken.Revoke(currentUtcTime);
-
-            if (revokeResult.IsError)
-            {
-                return revokeResult.Errors!;
-            }
-
-            return revokeResult;
-        }
-
         public Result<Updated> RevokeAllTokens(DateTimeOffset currentUtcTime)
         {
             if (!IsActivated)
