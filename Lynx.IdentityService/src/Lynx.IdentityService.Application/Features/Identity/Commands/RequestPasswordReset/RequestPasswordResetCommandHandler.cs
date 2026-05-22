@@ -1,9 +1,10 @@
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
+using Lynx.IdentityService.Application.Common.Settings;
 using Lynx.IdentityService.Domain.Common.Results;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPasswordReset
 {
@@ -13,7 +14,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
         ICacheService cacheService,
         IEmailService emailService,
         IOTPGeneratorService otpService,
-        IConfiguration config
+        IOptions<ClientUrlOptions> options
     ) : IRequestHandler<RequestPasswordResetCommand, Result<Success>>
     {
         public async Task<Result<Success>> Handle(RequestPasswordResetCommand request, CancellationToken cancellationToken)
@@ -34,10 +35,11 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
                 user.Email,
                 user.Username,
                 "Reset Password OTP",
-                "You requested a password reset for your account.\n" +
-                "The OTP for your password reset is: " + otp + "\n" +
-                "Please visit " + config["ResetPasswordUrl"] + " to create a new password using the OTP given above." +
-                "Please ignore this email if you did not request a password reset.",
+                $@"You requested a password reset for your account.
+                The OTP for your password reset is: {otp}
+                Please visit {options.Value.ResetPasswordUrl} to create a new password using the OTP given above.
+                Please ignore this email if you did not request a password reset.
+                ",
                 cancellationToken
             );
 

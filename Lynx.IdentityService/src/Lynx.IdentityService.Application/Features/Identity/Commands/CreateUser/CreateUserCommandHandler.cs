@@ -1,11 +1,12 @@
 using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
+using Lynx.IdentityService.Application.Common.Settings;
 using Lynx.IdentityService.Domain.Common.Results;
 using Lynx.IdentityService.Domain.Identity;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
 {
@@ -15,7 +16,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
         IOTPGeneratorService generatorService,
         IEmailService emailService,
         ICacheService cacheService,
-        IConfiguration config
+        IOptions<ClientUrlOptions> options
     ) : IRequestHandler<CreateUserCommand, Result<Guid>>
     {
         public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -55,7 +56,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
                 request.Email,
                 request.Username,
                 "Lynx Account Activation",
-                $@"Please visit ${config["ActivateAccountUrl"]} to activate your account.
+                $@"Please visit ${options.Value.ActivateAccountUrl} to activate your account.
                 The activation code is: {activationToken}.",
                 cancellationToken
             );
