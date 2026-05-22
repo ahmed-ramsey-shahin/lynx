@@ -390,7 +390,48 @@ namespace Lynx.IdentityService.Domain.UnitTests
         }
 #endregion // REVOKE_ALL_TOKENS
 
-        // RemoveExpiredRefreshTokens(DateTimeOffset currentUtcTime)
+#region REMOVE_EXPIRED_REFRESH_TOKENS_TESTS
+        [Fact]
+        public void RemoveExpiredRefreshTokens_Should_ReturnUpdated_WhenActivated()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            const int numberOfExpiredTokens = 5;
+            const int numberOfActiveTokens = 3;
+            var fiveMinutesAgo = DateTimeOffset.UtcNow.AddMinutes(-5);
+            var fiveMinutesLater = DateTimeOffset.UtcNow.AddMinutes(5);
+            var user = new UserBuilder()
+                .Activated()
+                .HasRefreshTokens(numberOfExpiredTokens, fiveMinutesAgo)
+                .HasRefreshTokens(numberOfActiveTokens, fiveMinutesLater)
+                .Build();
+
+            // Act
+            var removeResult = user.RemoveExpiredRefreshTokens(now);
+
+            // Asserta
+            removeResult.IsSuccess.Should().BeTrue();
+            var refreshTokens = user.RefreshTokens.Should().NotBeEmpty()
+                .And.HaveCount(numberOfActiveTokens)
+                .And.OnlyContain(token => token.ExpiresOn > now);
+        }
+
+        [Fact]
+        public void RemoveExpiredRefreshTokens_Should_ReturnNotActivated_WhenNotActivated()
+        {
+            // Arrange
+            var now = DateTimeOffset.UtcNow;
+            var user = new UserBuilder().HasRefreshTokens().Build();
+
+            // Act
+            var removeResult = user.RemoveExpiredRefreshTokens(now);
+
+            // Asserta
+            removeResult.IsSuccess.Should().BeFalse();
+            removeResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UserErrors.NotActivated.Code);
+        }
+#endregion // REMOVE_EXPIRED_REFRESH_TOKENS_TESTS
 
         // RemoveRefreshToken(string token)
     }
