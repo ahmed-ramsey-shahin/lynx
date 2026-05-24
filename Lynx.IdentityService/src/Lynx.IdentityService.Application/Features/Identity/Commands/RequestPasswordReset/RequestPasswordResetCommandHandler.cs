@@ -30,7 +30,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
             }
 
             var otp = otpService.GenerateResetCode();
-            var cacheWriteTask = cacheService.SetAsync($"reset_password_otps:{user.Username}", otp, TimeSpan.FromMinutes(15), cancellationToken);
+            var cacheWriteTask = cacheService.SetAsync($"reset_password_otps:{user.Id}", otp, TimeSpan.FromMinutes(15), cancellationToken);
             var emailTask = emailService.SendEmailAsync(
                 user.Email,
                 user.Username,

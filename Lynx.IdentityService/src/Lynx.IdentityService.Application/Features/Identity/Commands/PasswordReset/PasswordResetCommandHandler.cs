@@ -26,7 +26,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.PasswordRe
                 return ApplicationErrors.OtpExpired;
             }
 
-            var cacheKey = $"reset_password_otps:{user.Username}";
+            var cacheKey = $"reset_password_otps:{user.Id}";
             var cachedOtp = await cacheService.GetAsync<string>(cacheKey, cancellationToken);
 
             if (cachedOtp?.Equals(request.Code) != true)
