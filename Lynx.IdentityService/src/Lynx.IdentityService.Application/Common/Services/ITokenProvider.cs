@@ -6,7 +6,7 @@ namespace Lynx.IdentityService.Application.Common.Services
 {
     public interface ITokenProvider
     {
-        TokenDto? GenerateJwtToken(UserDto user, CancellationToken cancellationToken=default);
+        TokenDto? GenerateJwtToken(UserDto user);
         ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
         JsonWebKey GetPublicKeyJwk();
     }

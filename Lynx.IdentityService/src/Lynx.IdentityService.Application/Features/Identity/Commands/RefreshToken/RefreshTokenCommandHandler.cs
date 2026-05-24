@@ -57,7 +57,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RefreshTok
                 Username = user.Username,
                 Email = user.Email,
                 UserId = user.Id
-            }, cancellationToken);
+            });
 
             if (generatedToken is null)
             {
