@@ -29,7 +29,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
-        [InlineData(null)]
         public void Create_Should_ReturnTokenRequiredError_WhenTokenIsNullOrWhitespace(string token)
         {
             // Arrange

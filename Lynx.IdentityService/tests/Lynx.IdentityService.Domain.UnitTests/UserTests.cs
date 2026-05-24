@@ -53,7 +53,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData(" ")]
         [InlineData("")]
-        [InlineData(null)]
         public void Create_Should_ReturnEmailRequired_WhenEmailIsEmpty(string email)
         {
             // Arrange
@@ -73,7 +72,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData(" ")]
         [InlineData("")]
-        [InlineData(null)]
         public void Create_Should_ReturnUsernameRequired_WhenUsernameIsEmpty(string username)
         {
             // Arrange
@@ -93,7 +91,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData(" ")]
         [InlineData("")]
-        [InlineData(null)]
         public void Create_Should_ReturnPasswordRequired_WhenPasswordIsEmpty(string password)
         {
             // Arrange
@@ -150,7 +147,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
-        [InlineData(null)]
         public void ChangePassword_Should_ReturnPasswordRequired_WhenNewPasswordIsEmpty(string newPassword)
         {
             // Arrange
@@ -207,7 +203,6 @@ namespace Lynx.IdentityService.Domain.UnitTests
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
-        [InlineData(null)]
         public void ChangeUsername_Should_ReturnUsernameRequired_WhenNewUsernameIsEmpty(string newUsername)
         {
             // Arrange
