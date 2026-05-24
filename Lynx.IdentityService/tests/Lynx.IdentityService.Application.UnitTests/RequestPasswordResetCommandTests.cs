@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
