@@ -27,20 +27,22 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RefreshTok
                 return ApplicationErrors.ExpiredAccessTokenInvalid;
             }
 
-            var username = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdString = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (username is null)
+            if (userIdString is null)
             {
                 logger.LogWarning("Invalid user claim.");
                 return ApplicationErrors.UsernameClaimInvalid;
             }
 
-            var user = await userRepo.GetUserByUsernameAsync(username, cancellationToken);
+            var userId = Guid.Parse(userIdString);
+
+            var user = await userRepo.GetUserByIdAsync(userId, cancellationToken);
 
             if (user is null)
             {
                 if (logger.IsEnabled(LogLevel.Error))
-                    logger.LogError("No user was found with {Username}.", username);
+                    logger.LogError("No user was found with {Username}.", userId);
                 return ApplicationErrors.UserNotFound;
             }
 
@@ -62,7 +64,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RefreshTok
             if (generatedToken is null)
             {
                 if (logger.IsEnabled(LogLevel.Error))
-                    logger.LogError("Could not generate token for {Username}.", username);
+                    logger.LogError("Could not generate token for {Username}.", userId);
 
                 return ApplicationErrors.TokenGenerationFailed;
             }
