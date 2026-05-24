@@ -28,7 +28,14 @@ namespace Lynx.IdentityService.Infrastructure
 
         private static IServiceCollection AddRedisCache(this IServiceCollection services, string connectionString)
         {
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(connectionString));
+            var options = ConfigurationOptions.Parse(connectionString);
+            options.ConnectTimeout = 10_000;
+            options.SyncTimeout = 10_000;
+            options.AsyncTimeout = 10_000;
+            options.ConnectRetry = 5;
+            options.AbortOnConnectFail = false;
+            options.ReconnectRetryPolicy = new ExponentialRetry(500, 2000);
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(options));
             services.AddScoped<ICacheService, CacheService>();
             return services;
         }
