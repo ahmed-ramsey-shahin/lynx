@@ -11,11 +11,19 @@ namespace Lynx.IdentityService.Infrastructure.Data.Configuration
             var usersCollection = database.GetCollection<User>(DbConstants.UserTableName);
 
             var usernameIndexKey = Builders<User>.IndexKeys.Ascending(user => user.Username);
-            var usernameIndexOptions = new CreateIndexOptions { Unique = true };
+            var usernameIndexOptions = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = DbConstants.UsernameIndexName
+            };
             var usernameIndexModel = new CreateIndexModel<User>(usernameIndexKey, usernameIndexOptions);
 
             var emailIndexKey = Builders<User>.IndexKeys.Ascending(user => user.Email);
-            var emailIndexOptions = new CreateIndexOptions { Unique = true };
+            var emailIndexOptions = new CreateIndexOptions
+            {
+                Unique = true,
+                Name = DbConstants.EmailIndexName
+            };
             var emailIndexModel = new CreateIndexModel<User>(emailIndexKey, emailIndexOptions);
 
             await usersCollection.Indexes.CreateManyAsync(
