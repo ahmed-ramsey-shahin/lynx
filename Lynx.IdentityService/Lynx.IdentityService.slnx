@@ -9,5 +9,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/Lynx.IdentityService.Application.UnitTests/Lynx.IdentityService.Application.UnitTests.csproj" />
     <Project Path="tests/Lynx.IdentityService.Domain.UnitTests/Lynx.IdentityService.Domain.UnitTests.csproj" />
+    <Project Path="tests/Lynx.IdentityService.Infrastructure.Tests/Lynx.IdentityService.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>
