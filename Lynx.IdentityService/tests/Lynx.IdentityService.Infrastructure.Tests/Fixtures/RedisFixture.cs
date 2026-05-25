@@ -5,14 +5,14 @@ namespace Lynx.IdentityService.Infrastructure.Tests.Fixtures
 {
     public class RedisFixture : IAsyncLifetime
     {
-        private readonly RedisContainer _redisContainer = new RedisBuilder("redis-alpine")
+        private readonly RedisContainer _redisContainer = new RedisBuilder("redis:7.2-alpine")
             .Build();
-        public IConnectionMultiplexer RedisConnection { get; private set; } = null!;
+        public IConnectionMultiplexer Cluster { get; private set; } = null!;
 
         public async Task InitializeAsync()
         {
             await _redisContainer.StartAsync();
-            RedisConnection = ConnectionMultiplexer.Connect(_redisContainer.GetConnectionString());
+            Cluster = ConnectionMultiplexer.Connect(_redisContainer.GetConnectionString());
         }
 
         public async Task DisposeAsync()
