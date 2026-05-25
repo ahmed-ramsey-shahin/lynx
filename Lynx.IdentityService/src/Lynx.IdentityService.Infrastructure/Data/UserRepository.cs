@@ -25,7 +25,7 @@ namespace Lynx.IdentityService.Infrastructure.Data
         public async Task<int> DeleteUnactivatedUsersAsync(DateTimeOffset maxCreationDate, CancellationToken cancellationToken = default)
         {
             var notActivatedFilter = Builders<User>.Filter.Eq(user => user.IsActivated, false);
-            var activationDatePassedFilter = Builders<User>.Filter.Lt(user => user.CreatedAt, maxCreationDate);
+            var activationDatePassedFilter = Builders<User>.Filter.Lte(user => user.CreatedAt, maxCreationDate);
             var filter = Builders<User>.Filter.And([notActivatedFilter, activationDatePassedFilter]);
             var result = await _users.DeleteManyAsync(filter, cancellationToken);
             return (int) result.DeletedCount;
