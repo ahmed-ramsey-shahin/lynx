@@ -49,8 +49,8 @@ namespace Lynx.IdentityService.Infrastructure
                 client.BaseAddress = new Uri("https://api.brevo.com/v3/smtp/email");
                 client.DefaultRequestHeaders.Add("accept", "application/json");
                 client.DefaultRequestHeaders.Add("api-key", apiKey);
-                client.DefaultRequestHeaders.Add("content-type", "application/json");
             });
+            services.AddScoped<IEmailService, EmailService>();
             return services;
         }
 
