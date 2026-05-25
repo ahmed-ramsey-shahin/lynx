@@ -63,8 +63,7 @@ namespace Lynx.IdentityService.Infrastructure
             services.AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
                 .AddBrevoEmails(brevoApiKey)
-                .AddTransient<IOTPGeneratorService, OtpGeneratorService>()
-                .AddTransient<IPasswordGenerationService, PasswordGenerationService>();
+                .AddTransient<IOTPGeneratorService, OtpGeneratorService>();
             return services;
         }
     }
