@@ -1,6 +1,6 @@
 using FluentAssertions;
-using Lynx.IdentityService.Infrastructure.Configurations;
 using Lynx.IdentityService.Infrastructure.Services;
+using Lynx.IdentityService.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -20,7 +20,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests.EmailServiceTests
             var httpClientFactoryMock = new Mock<IHttpClientFactory>();
             httpClientFactoryMock.Setup(factory => factory.CreateClient(It.IsAny<string>()))
                 .Returns(fakeClient);
-            var configOptions = Options.Create(new EmailServiceConfigurations
+            var configOptions = Options.Create(new EmailSettings
             {
                 SenderEmail = "lynx@lynx.com",
                 SenderName = "lynx"

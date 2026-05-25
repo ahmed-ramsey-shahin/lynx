@@ -1,10 +1,10 @@
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
-using Lynx.IdentityService.Infrastructure.Configurations;
 using Lynx.IdentityService.Infrastructure.Data;
 using Lynx.IdentityService.Infrastructure.Data.Configuration;
 using Lynx.IdentityService.Infrastructure.Exceptions;
 using Lynx.IdentityService.Infrastructure.Services;
+using Lynx.IdentityService.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -60,12 +60,13 @@ namespace Lynx.IdentityService.Infrastructure
             var redisConnectionString = config.GetConnectionString("RedisConnectionString") ?? throw new InfrastructureConfigurationException("RedisConnectionString");
             var brevoApiKey = config["Email:ApiKey"] ?? throw new InfrastructureConfigurationException("Email:ApiKey");
             var passwordPepper = config["Security::PasswordPepper"] ?? throw new InfrastructureConfigurationException("PasswordPepper");
-            services.Configure<EmailServiceConfigurations>(config.GetSection("EmailService"));
+            services.Configure<EmailSettings>(config.GetSection("EmailService"));
             services.AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
                 .AddBrevoEmails(brevoApiKey)
                 .AddTransient<IOTPGeneratorService, OtpGeneratorService>()
-                .AddTransient<IPasswordHashingService>(_ => new PasswordHashingService(passwordPepper));
+                .AddTransient<IPasswordHashingService>(_ => new PasswordHashingService(passwordPepper))
+                .AddTransient<ITokenProvider, TokenProvider>();
             return services;
         }
     }

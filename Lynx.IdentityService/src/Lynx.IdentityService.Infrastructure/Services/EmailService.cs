@@ -1,13 +1,13 @@
 using System.Net.Http.Json;
 using Lynx.IdentityService.Application.Common.Services;
-using Lynx.IdentityService.Infrastructure.Configurations;
+using Lynx.IdentityService.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 
 namespace Lynx.IdentityService.Infrastructure.Services
 {
     public class EmailService(
         IHttpClientFactory clientFactory,
-        IOptions<EmailServiceConfigurations> config
+        IOptions<EmailSettings> config
     ) : IEmailService
     {
         private readonly HttpClient _emailClient = clientFactory.CreateClient("BrevoEmailClient");
