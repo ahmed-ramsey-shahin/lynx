@@ -62,7 +62,9 @@ namespace Lynx.IdentityService.Infrastructure
             services.Configure<EmailServiceConfigurations>(config.GetSection("EmailService"));
             services.AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
-                .AddBrevoEmails(brevoApiKey);
+                .AddBrevoEmails(brevoApiKey)
+                .AddTransient<IOTPGeneratorService, OtpGeneratorService>()
+                .AddTransient<IPasswordGenerationService, PasswordGenerationService>();
             return services;
         }
     }
