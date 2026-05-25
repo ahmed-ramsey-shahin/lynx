@@ -59,11 +59,13 @@ namespace Lynx.IdentityService.Infrastructure
             var mongoDbConnectionString = config.GetConnectionString("MongoDbConnectionString") ?? throw new InfrastructureConfigurationException("MongoDbConnectionString");
             var redisConnectionString = config.GetConnectionString("RedisConnectionString") ?? throw new InfrastructureConfigurationException("RedisConnectionString");
             var brevoApiKey = config["Email:ApiKey"] ?? throw new InfrastructureConfigurationException("Email:ApiKey");
+            var passwordPepper = config["Security::PasswordPepper"] ?? throw new InfrastructureConfigurationException("PasswordPepper");
             services.Configure<EmailServiceConfigurations>(config.GetSection("EmailService"));
             services.AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
                 .AddBrevoEmails(brevoApiKey)
-                .AddTransient<IOTPGeneratorService, OtpGeneratorService>();
+                .AddTransient<IOTPGeneratorService, OtpGeneratorService>()
+                .AddTransient<IPasswordHashingService>(_ => new PasswordHashingService(passwordPepper));
             return services;
         }
     }
