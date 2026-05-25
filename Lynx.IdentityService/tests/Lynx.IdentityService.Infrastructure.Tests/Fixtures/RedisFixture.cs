@@ -3,7 +3,7 @@ using Testcontainers.Redis;
 
 namespace Lynx.IdentityService.Infrastructure.Tests.Fixtures
 {
-    public class RedisFixture
+    public class RedisFixture : IAsyncLifetime
     {
         private readonly RedisContainer _redisContainer = new RedisBuilder("redis-alpine")
             .Build();

@@ -4,7 +4,7 @@ using Testcontainers.MongoDb;
 
 namespace Lynx.IdentityService.Infrastructure.Tests.Fixtures
 {
-    public class DatabaseFixture
+    public class DatabaseFixture : IAsyncLifetime
     {
         private readonly MongoDbContainer _mongoContainer = new MongoDbBuilder("mongodb/mongodb-community-server:latest")
             .Build();
