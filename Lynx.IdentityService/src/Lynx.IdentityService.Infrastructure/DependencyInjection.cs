@@ -13,10 +13,11 @@ namespace Lynx.IdentityService.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static async Task ConfigureMongoDbAsync(IServiceProvider serviceProvider)
+        public static async Task ConfigureMongoDbAsync(this IServiceProvider services)
         {
             MongoDbConfiguration.ConfigureMappings();
-            await MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(serviceProvider.GetService<IMongoClient>()!);
+            var client = services.GetRequiredService<IMongoClient>();
+            await MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(client);
         }
 
         private static IServiceCollection AddMongoDb(this IServiceCollection services, string connectionString)
