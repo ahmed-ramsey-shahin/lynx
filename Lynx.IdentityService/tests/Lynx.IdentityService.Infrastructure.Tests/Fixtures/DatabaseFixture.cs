@@ -6,7 +6,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests.Fixtures
 {
     public class DatabaseFixture : IAsyncLifetime
     {
-        private readonly MongoDbContainer _mongoContainer = new MongoDbBuilder("mongodb/mongodb-community-server:latest")
+        private readonly MongoDbContainer _mongoContainer = new MongoDbBuilder("mongo:7.0")
             .Build();
         public IMongoClient MongoClient { get; private set; } = null!;
 

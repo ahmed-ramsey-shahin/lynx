@@ -4,11 +4,14 @@ namespace Lynx.IdentityService.Domain.Identity
 {
     public sealed class RefreshToken
     {
-        public string Token { get; }
-        public DateTimeOffset ExpiresOn { get; }
+        public string Token { get; private set; } = null!;
+        public DateTimeOffset ExpiresOn { get; private set; }
         public bool IsRevoked { get; private set; }
         public DateTimeOffset? RevokedAt { get; private set; }
         public bool IsValid => !IsRevoked && ExpiresOn > DateTimeOffset.UtcNow;
+
+        private RefreshToken()
+        {}
 
         private RefreshToken(string token, DateTimeOffset expiresOn)
         {

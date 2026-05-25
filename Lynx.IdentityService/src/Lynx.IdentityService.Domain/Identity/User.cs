@@ -5,14 +5,17 @@ namespace Lynx.IdentityService.Domain.Identity
 {
     public sealed class User : EventfulEntity
     {
-        public Guid Id { get; }
-        public string Email { get; }
-        public string Username { get; private set; }
-        public string Password { get; private set; }
+        public Guid Id { get; private set; }
+        public string Email { get; private set; } = null!;
+        public string Username { get; private set; } = null!;
+        public string Password { get; private set; } = null!;
         public bool IsActivated { get; private set; }
         public DateTimeOffset? ActivationDate { get; private set; }
         private readonly List<RefreshToken> _refreshTokens = [];
         public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+
+        private User()
+        {}
 
         private User(Guid id, string email, string username, string password)
         {
