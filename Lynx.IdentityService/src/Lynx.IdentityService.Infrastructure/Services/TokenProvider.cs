@@ -49,12 +49,45 @@ namespace Lynx.IdentityService.Infrastructure.Services
 
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
-            throw new NotImplementedException();
+            using var rsa = RSA.Create();
+            rsa.ImportFromPem(options.Value.PrivateKey);
+            var securityKey = new RsaSecurityKey(rsa);
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidAudience = options.Value.Audience,
+                ValidIssuer = options.Value.Issuer,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey,
+                ValidateLifetime = false
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+            if (
+                securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.RsaSha256, StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                throw new SecurityTokenException("Invalid token algorithm");
+            }
+
+            return principal;
         }
 
         public JsonWebKey GetPublicKeyJwk()
         {
-            throw new NotImplementedException();
+            using var rsa = RSA.Create();
+            rsa.ImportFromPem(options.Value.PrivateKey);
+            var securityKey = new RsaSecurityKey(rsa)
+            {
+                KeyId = "lynx-auth-key-1"
+            };
+            var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(securityKey);
+            jwk.Alg = SecurityAlgorithms.RsaSha256;
+            jwk.Use = "sig";
+            return jwk;
         }
     }
 }
