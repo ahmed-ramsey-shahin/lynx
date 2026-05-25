@@ -1,5 +1,6 @@
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
+using Lynx.IdentityService.Infrastructure.Configurations;
 using Lynx.IdentityService.Infrastructure.Data;
 using Lynx.IdentityService.Infrastructure.Data.Configuration;
 using Lynx.IdentityService.Infrastructure.Exceptions;
@@ -41,12 +42,27 @@ namespace Lynx.IdentityService.Infrastructure
             return services;
         }
 
+        private static IServiceCollection AddBrevoEmails(this IServiceCollection services, string apiKey)
+        {
+            services.AddHttpClient("BrevoEmailClient", client =>
+            {
+                client.BaseAddress = new Uri("https://api.brevo.com/v3/smtp/email");
+                client.DefaultRequestHeaders.Add("accept", "application/json");
+                client.DefaultRequestHeaders.Add("api-key", apiKey);
+                client.DefaultRequestHeaders.Add("content-type", "application/json");
+            });
+            return services;
+        }
+
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
             var mongoDbConnectionString = config.GetConnectionString("MongoDbConnectionString") ?? throw new InfrastructureConfigurationException("MongoDbConnectionString");
             var redisConnectionString = config.GetConnectionString("RedisConnectionString") ?? throw new InfrastructureConfigurationException("RedisConnectionString");
+            var brevoApiKey = config["Email:ApiKey"] ?? throw new InfrastructureConfigurationException("Email:ApiKey");
+            services.Configure<EmailServiceConfigurations>(config.GetSection("EmailService"));
             services.AddMongoDb(mongoDbConnectionString)
-                .AddRedisCache(redisConnectionString);
+                .AddRedisCache(redisConnectionString)
+                .AddBrevoEmails(brevoApiKey);
             return services;
         }
     }
