@@ -12,7 +12,8 @@ namespace Lynx.IdentityService.Infrastructure.Tests.Fixtures
         public async Task InitializeAsync()
         {
             await _redisContainer.StartAsync();
-            Cluster = ConnectionMultiplexer.Connect(_redisContainer.GetConnectionString());
+            var connString = _redisContainer.GetConnectionString();
+            Cluster = ConnectionMultiplexer.Connect($"{connString},allowAdmin=true");
         }
 
         public async Task DisposeAsync()
