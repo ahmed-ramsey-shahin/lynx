@@ -143,7 +143,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             // Assert
             userResult.Should().BeNull();
         }
-#endregion // GET_USER_BY_ID_ASYNC
+#endregion // GET_USER_BY_ID_TESTS
 
 #region DELETE_UNACTIVATED_USERS_TESTS
         [Fact]
@@ -187,5 +187,151 @@ namespace Lynx.IdentityService.Infrastructure.Tests
                 .BeEquivalentTo(expectedRemainingUsernames);
         }
 #endregion // DELETE_UNACTIVATED_USERS_TESTS
+
+#region GET_USER_BY_EMAIL_TESTS
+        [Fact]
+        public async Task GetUserByEmailAsync_Should_ReturnUser_WhenEmailIsCorrect()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            var user = User.Create(
+                userId,
+                "user@lynx.com",
+                "lynx_user",
+                "Password@123_Hashed"
+            ).Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var userResult = await _userRepository.GetUserByEmailAsync("user@lynx.com");
+
+            // Assert
+            userResult.Should().NotBeNull();
+            userResult.Id.Should().Be(userId);
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_Should_ReturnNull_WhenEmailIsNotFound()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            var user = User.Create(
+                userId,
+                "user@lynx.com",
+                "lynx_user",
+                "Password@123_Hashed"
+            ).Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var userResult = await _userRepository.GetUserByEmailAsync("wrong_user@lynx.com");
+
+            // Assert
+            userResult.Should().BeNull();
+        }
+#endregion // GET_USER_BY_EMAIL_TESTS
+
+#region GET_USER_BY_USERNAME_TESTS
+        [Fact]
+        public async Task GetUserByUsernameAsync_Should_ReturnUser_WhenUsernameIsCorrect()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            var user = User.Create(
+                userId,
+                "user@lynx.com",
+                "lynx_user",
+                "Password@123_Hashed"
+            ).Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var userResult = await _userRepository.GetUserByUsernameAsync("lynx_user");
+
+            // Assert
+            userResult.Should().NotBeNull();
+            userResult.Id.Should().Be(userId);
+        }
+
+        [Fact]
+        public async Task GetUserByUsernameAsync_Should_ReturnNull_WhenUsernameIsNotFound()
+        {
+            // Arrange
+            Guid userId = Guid.NewGuid();
+            var user = User.Create(
+                userId,
+                "user@lynx.com",
+                "lynx_user",
+                "Password@123_Hashed"
+            ).Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var userResult = await _userRepository.GetUserByUsernameAsync("lynx_wrong_user");
+
+            // Assert
+            userResult.Should().BeNull();
+        }
+#endregion // GET_USER_BY_USERNAME_TESTS
+
+#region IS_EMAIL_UNIQUE_TESTS
+        [Fact]
+        public async Task IsEmailUniqueAsync_Should_ReturnTrue_WhenEmailIsUnique()
+        {
+            // Arrange
+            var user = User.Create(Guid.NewGuid(), "user@lynx.com", "lynx_user", "Password@123_Hashed").Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var result = await _userRepository.IsEmailUniqueAsync("users2@lynx.com");
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task IsEmailUniqueAsync_Should_ReturnFalse_WhenEmailIsNotUnique()
+        {
+            // Arrange
+            var user = User.Create(Guid.NewGuid(), "user@lynx.com", "lynx_user", "Password@123_Hashed").Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var result = await _userRepository.IsEmailUniqueAsync("user@lynx.com");
+
+            // Assert
+            result.Should().BeFalse();
+        }
+#endregion // IS_EMAIL_UNIQUE_TESTS
+
+#region IS_USERNAME_UNIQUE_TESTS
+        [Fact]
+        public async Task IsUsernameUniqueAsync_Should_ReturnTrue_WhenUsernameIsUnique()
+        {
+            // Arrange
+            var user = User.Create(Guid.NewGuid(), "user@lynx.com", "lynx_user", "Password@123_Hashed").Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var result = await _userRepository.IsUsernameUniqueAsync("lynx_user2");
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task IsUsernameUniqueAsync_Should_ReturnFalse_WhenUsernameIsNotUnique()
+        {
+            // Arrange
+            var user = User.Create(Guid.NewGuid(), "user@lynx.com", "lynx_user", "Password@123_Hashed").Value;
+            await _userRepository.AddAsync(user);
+
+            // Act
+            var result = await _userRepository.IsUsernameUniqueAsync("lynx_user");
+
+            // Assert
+            result.Should().BeFalse();
+        }
+#endregion // IS_EMAIL_UNIQUE_TESTS
     }
 }
