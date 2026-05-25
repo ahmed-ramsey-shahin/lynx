@@ -57,3 +57,5 @@ TestResult.xml
 nunit-*.xml
 **/TestResults/
 coverage-report/
+*.pem
+*.DS_STORE
