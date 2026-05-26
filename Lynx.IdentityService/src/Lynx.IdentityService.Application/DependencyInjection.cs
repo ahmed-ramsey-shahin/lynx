@@ -23,6 +23,7 @@ namespace Lynx.IdentityService.Application
                 configuration.AddOpenBehavior(typeof(CachingBehavior<,>));
             });
             services.Configure<ClientUrlOptions>(config.GetSection(ClientUrlOptions.SectionName));
+            services.AddSingleton(TimeProvider.System);
             return services;
         }
     }

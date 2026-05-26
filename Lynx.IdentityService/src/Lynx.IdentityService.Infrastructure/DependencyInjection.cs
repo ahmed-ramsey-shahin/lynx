@@ -4,6 +4,7 @@ using Lynx.IdentityService.Infrastructure.Data;
 using Lynx.IdentityService.Infrastructure.Data.Configuration;
 using Lynx.IdentityService.Infrastructure.Exceptions;
 using Lynx.IdentityService.Infrastructure.Services;
+using Lynx.IdentityService.Infrastructure.Services.RabbitMq;
 using Lynx.IdentityService.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,8 +57,9 @@ namespace Lynx.IdentityService.Infrastructure
 
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
-            var mongoDbConnectionString = config.GetConnectionString("MongoDbConnectionString") ?? throw new InfrastructureConfigurationException("MongoDbConnectionString");
-            var redisConnectionString = config.GetConnectionString("RedisConnectionString") ?? throw new InfrastructureConfigurationException("RedisConnectionString");
+            var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings::MongoDB");
+            var redisConnectionString = config.GetConnectionString("Redis") ?? throw new InfrastructureConfigurationException("ConnectionStrings::Redis");
+            var rabbitMQConnectionString = config.GetConnectionString("RabbitMQ") ?? throw new InfrastructureConfigurationException("ConnectionStrings::RabbitMQ");
             var brevoApiKey = config["Email:ApiKey"] ?? throw new InfrastructureConfigurationException("Email:ApiKey");
             var passwordPepper = config["Security::PasswordPepper"] ?? throw new InfrastructureConfigurationException("PasswordPepper");
             services.Configure<EmailSettings>(config.GetSection("EmailService"));
@@ -68,7 +70,8 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddTransient<IOTPGeneratorService, OtpGeneratorService>()
                 .AddTransient<IPasswordHashingService>(_ => new PasswordHashingService(passwordPepper))
                 .AddTransient<ITokenProvider, TokenProvider>()
-                .AddSingleton(TimeProvider.System);
+                .AddSingleton(TimeProvider.System)
+                .AddSingleton<IRabbitMqConnectionManager>(_ => new RabbitMqConnectionManager(rabbitMQConnectionString));
             return services;
         }
     }
