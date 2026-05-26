@@ -12,15 +12,16 @@ namespace Lynx.IdentityService.Infrastructure.Tests
         {
             // Arrange
             HashSet<string> set = [];
+            const int numberOfTests = 1000;
 
             // Act
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < numberOfTests; i++)
             {
                 set.Add(_generatorService!.GenerateResetCode());
             }
 
             // Assert
-            set.Should().HaveCount(100);
+            set.Should().HaveCount(numberOfTests);
         }
 
         [Fact]
@@ -37,15 +38,16 @@ namespace Lynx.IdentityService.Infrastructure.Tests
         {
             // Arrange
             HashSet<string> set = [];
+            const int numberOfTests = 1000;
 
             // Act
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < numberOfTests; i++)
             {
                 set.Add(_generatorService!.GenerateUrlSafeToken());
             }
 
             // Assert
-            set.Should().HaveCount(100);
+            set.Should().HaveCount(numberOfTests);
         }
 
         [Fact]

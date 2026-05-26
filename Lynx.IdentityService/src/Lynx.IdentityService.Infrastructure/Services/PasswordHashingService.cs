@@ -23,7 +23,7 @@ namespace Lynx.IdentityService.Infrastructure.Services
                 return false;
             }
 
-            return BCrypt.Net.BCrypt.EnhancedVerify(password, hash);
+            return BCrypt.Net.BCrypt.EnhancedVerify(password + password, hash);
         }
     }
 }
