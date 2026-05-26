@@ -63,7 +63,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser
             }
 
             await userRepo.UpdateAsync(user, cancellationToken);
-            await publishingService.PublishAsync(PublishingQueues.DeleteUser, user.Id);
+            await publishingService.PublishAsync(PublishingQueues.DeleteUser, user.Id, cancellationToken);
             await cacheService.RemoveAsync($"users:{user.Username}", cancellationToken);
             return Result.Deleted;
         }

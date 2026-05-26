@@ -80,7 +80,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                     user.DeletedAt == _timeProvider.GetUtcNow()
                 ), It.IsAny<CancellationToken>()
             ), Times.Once());
-            messagePublisher.Mock.Verify(publisher => publisher.PublishAsync(It.IsAny<string>(), userId), Times.Once());
+            messagePublisher.Mock.Verify(publisher => publisher.PublishAsync(It.IsAny<string>(), userId, It.IsAny<CancellationToken>()), Times.Once());
             userService.Mock.Verify(service => service.UserId, Times.AtLeastOnce());
             cacheService.Mock.Verify(service => service.RemoveAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once());
         }
