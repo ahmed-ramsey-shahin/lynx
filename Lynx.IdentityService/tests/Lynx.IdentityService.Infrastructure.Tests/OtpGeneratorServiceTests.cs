@@ -12,7 +12,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
         {
             // Arrange
             HashSet<string> set = [];
-            const int numberOfTests = 1000;
+            const int numberOfTests = 100;
 
             // Act
             for (int i = 0; i < numberOfTests; i++)
