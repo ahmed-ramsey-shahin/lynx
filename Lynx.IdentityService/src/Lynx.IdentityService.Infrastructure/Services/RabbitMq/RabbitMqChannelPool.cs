@@ -3,13 +3,13 @@ using RabbitMQ.Client;
 
 namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
 {
-    public interface IRabbitMqChannelPool
+    public interface IRabbitMqChannelPool : IAsyncDisposable
     {
         ValueTask<IChannel> GetChannelAsync(CancellationToken cancellationToken=default);
         void ReturnChannel(IChannel channel);
     }
 
-    public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager) : IRabbitMqChannelPool, IAsyncDisposable
+    public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager) : IRabbitMqChannelPool
     {
         private readonly ConcurrentQueue<IChannel> _pool = new();
         private readonly int _maxPoolSize =30;

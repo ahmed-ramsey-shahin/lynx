@@ -2,12 +2,12 @@ using RabbitMQ.Client;
 
 namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
 {
-    public interface IRabbitMqConnectionManager
+    public interface IRabbitMqConnectionManager : IAsyncDisposable
     {
         Task<IConnection> GetConnectionAsync();
     }
 
-    public class RabbitMqConnectionManager : IRabbitMqConnectionManager, IAsyncDisposable
+    public class RabbitMqConnectionManager : IRabbitMqConnectionManager
     {
         private readonly ConnectionFactory _factory;
         private readonly SemaphoreSlim _semaphore;
