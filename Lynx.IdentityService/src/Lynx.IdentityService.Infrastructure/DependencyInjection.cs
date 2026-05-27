@@ -124,11 +124,11 @@ namespace Lynx.IdentityService.Infrastructure
 
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
-            var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings::MongoDB");
-            var redisConnectionString = config.GetConnectionString("Redis") ?? throw new InfrastructureConfigurationException("ConnectionStrings::Redis");
-            var rabbitMqConnectionString = config.GetConnectionString("RabbitMQ") ?? throw new InfrastructureConfigurationException("ConnectionStrings::RabbitMQ");
+            var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings:MongoDB");
+            var redisConnectionString = config.GetConnectionString("Redis") ?? throw new InfrastructureConfigurationException("ConnectionStrings:Redis");
+            var rabbitMqConnectionString = config.GetConnectionString("RabbitMQ") ?? throw new InfrastructureConfigurationException("ConnectionStrings:RabbitMQ");
             var brevoApiKey = config["Email:ApiKey"] ?? throw new InfrastructureConfigurationException("Email:ApiKey");
-            var passwordPepper = config["Security::PasswordPepper"] ?? throw new InfrastructureConfigurationException("PasswordPepper");
+            var passwordPepper = config["Security:PasswordPepper"] ?? throw new InfrastructureConfigurationException("Security:PasswordPepper");
             services.Configure<EmailSettings>(config.GetSection("EmailService"));
             services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
             services.AddMongoDb(mongoDbConnectionString)
