@@ -17,7 +17,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
         {
             if (validator is null)
             {
-                return await next(cancellationToken);
+                return await next();
             }
 
             if (logger.IsEnabled(LogLevel.Information))
@@ -28,7 +28,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (validationResult.IsValid)
             {
                 logger.LogInformation("Validation successfull");
-                return await next(cancellationToken);
+                return await next();
             }
 
             var errors = validationResult.Errors

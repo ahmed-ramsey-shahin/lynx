@@ -20,7 +20,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Request: {Name} {UserId} {@Request}", requestName, userId, request);
 
-            return await next(cancellationToken);
+            return await next();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
         {
             if (request is not IIdempotentCommand idempotentCommand)
             {
-                return await next(cancellationToken);
+                return await next();
             }
 
             if (logger.IsEnabled(LogLevel.Information))
@@ -48,7 +48,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
 
             try
             {
-                var result = await next(cancellationToken);
+                var result = await next();
                 if (result.IsError)
                 {
                     if (logger.IsEnabled(LogLevel.Error))

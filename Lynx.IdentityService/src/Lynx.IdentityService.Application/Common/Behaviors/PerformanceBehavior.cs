@@ -18,7 +18,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
         public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
             _timer.Start();
-            var response = await next(cancellationToken);
+            var response = await next();
             _timer.Stop();
             var elapsedMilliseconds = _timer.ElapsedMilliseconds;
 

@@ -14,7 +14,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
         {
             try
             {
-                return await next(cancellationToken);
+                return await next();
             }
             catch(Exception ex)
             {
