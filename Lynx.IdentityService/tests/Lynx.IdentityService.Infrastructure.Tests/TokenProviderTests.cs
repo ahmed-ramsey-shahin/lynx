@@ -7,6 +7,7 @@ using Lynx.IdentityService.Infrastructure.Services;
 using Lynx.IdentityService.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 
 namespace Lynx.IdentityService.Infrastructure.Tests
@@ -69,6 +70,61 @@ namespace Lynx.IdentityService.Infrastructure.Tests
                 .Value.Should().NotBeNull().And.Be(userDto.Email);
             jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name)?
                 .Value.Should().NotBeNull().And.Be(userDto.Username);
+            jwtToken.SignatureAlgorithm.Should().Be(SecurityAlgorithms.RsaSha256);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GetPrincipalFromExpiredToken_Should_ReturnTheCorrectPrincipalIfTheTokenIsExpiredOrNot(bool isExpired)
+        {
+            // Arrange
+            var userDto = new UserDto
+            {
+                UserId = Guid.NewGuid(),
+                Email = "user@lynx.com",
+                Username = "lynx_user"
+            };
+            const string expectedRefreshToken = "mocked_refresh_token";
+            _generatorService.Setup(service => service.GenerateUrlSafeToken(64)).Returns(expectedRefreshToken);
+            var now = new DateTimeOffset(2026, 5, 27, 16, 0, 0, TimeSpan.Zero);
+            var timeAfterExpiration = now.AddMinutes(_jwtSettings.ExpiryMinutes + 5);
+            _timeProvider.SetUtcNow(now);
+            var expectedExpiresAt = now.AddMinutes(_jwtSettings.ExpiryMinutes);
+            var accessTokenDto = _provider.GenerateJwtToken(userDto);
+
+            if (isExpired)
+            {
+                _timeProvider.SetUtcNow(timeAfterExpiration);
+            }
+
+            // Act
+            var principal = _provider.GetPrincipalFromExpiredToken(accessTokenDto!.AccessToken);
+
+            // Assert
+            principal.Should().NotBeNull();
+            principal!.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
+                .Should().NotBeNull().And.Be(userDto.UserId.ToString());
+            principal!.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Name)?.Value
+                .Should().NotBeNull().And.Be(userDto.Username);
+            principal!.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Email)?.Value
+                .Should().NotBeNull().And.Be(userDto.Email);
+        }
+
+        [Fact]
+        public void GetPublicKeyJwk_Should_ReturnCorrectPublickKey()
+        {
+            // Act
+            var jwk = _provider.GetPublicKeyJwk();
+
+            // Assert
+            jwk.Should().NotBeNull();
+            jwk.Kty.Should().Be("RSA");
+            jwk.Alg.Should().Be(SecurityAlgorithms.RsaSha256);
+            jwk.Use.Should().Be("sig");
+            jwk.KeyId.Should().Be("lynx-auth-key-1");
+            jwk.N.Should().NotBeNull();
+            jwk.E.Should().NotBeNull();
         }
     }
 }
