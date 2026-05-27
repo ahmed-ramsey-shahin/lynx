@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Hangfire;
+using Hangfire.Redis.StackExchange;
 using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
@@ -69,8 +70,14 @@ namespace Lynx.IdentityService.Infrastructure
             return services;
         }
 
-        private static IServiceCollection AddHangfireJobs(this IServiceCollection services)
+        private static IServiceCollection AddHangfireJobs(this IServiceCollection services, string redisConnectionString)
         {
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseRedisStorage(redisConnectionString)
+            );
             services.AddHangfireServer();
             return services;
         }
@@ -142,7 +149,7 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddRabbitMQ(rabbitMqConnectionString)
                 .AddSingleton<IEmailBackgroundQueue, EmailBackgroundQueue>()
                 .AddHostedService<EmailBackgroundWorker>()
-                .AddHangfireJobs()
+                .AddHangfireJobs(redisConnectionString)
                 .AddLynxHealthChecks(redisConnectionString)
                 .AddJwtAuthentication(config);
             return services;
