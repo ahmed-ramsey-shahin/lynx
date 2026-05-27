@@ -1,5 +1,6 @@
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Domain.Identity;
+using MediatR;
 using MongoDB.Driver;
 
 namespace Lynx.IdentityService.Infrastructure.Data
@@ -8,17 +9,26 @@ namespace Lynx.IdentityService.Infrastructure.Data
     {
         private readonly IMongoCollection<User> _users;
         private readonly IMongoClient _client;
+        private readonly IPublisher _publisher;
 
-        public UserRepository(IMongoClient client)
+        public UserRepository(IMongoClient client, IPublisher publisher)
         {
             _client = client;
             var database = _client.GetDatabase(DbConstants.DbName);
             _users = database.GetCollection<User>(DbConstants.UserTableName);
+            _publisher = publisher;
         }
 
         public async Task<bool> AddAsync(User user, CancellationToken cancellationToken = default)
         {
             await _users.InsertOneAsync(user, null, cancellationToken);
+
+            foreach (var evt in user.Events)
+            {
+                await _publisher.Publish(evt, cancellationToken);
+            }
+
+            user.ClearEvents();
             return true;
         }
 
@@ -82,7 +92,19 @@ namespace Lynx.IdentityService.Infrastructure.Data
                 new ReplaceOptions { IsUpsert = false },
                 cancellationToken
             );
-            return result.IsAcknowledged && result.MatchedCount > 0;
+
+            if (!result.IsAcknowledged || result.MatchedCount <= 0)
+            {
+                return false;
+            }
+
+            foreach (var evt in user.Events)
+            {
+                await _publisher.Publish(evt, cancellationToken);
+            }
+
+            user.ClearEvents();
+            return true;
         }
     }
 }
