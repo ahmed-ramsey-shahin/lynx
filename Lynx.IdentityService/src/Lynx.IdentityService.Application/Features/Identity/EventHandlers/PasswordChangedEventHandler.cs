@@ -11,8 +11,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.EventHandlers
         {
             await emailQueue.QueueEmailAsync(
                 new EmailJob(
-                    notification.Username,
                     notification.Email,
+                    notification.Username,
                     "Your password has changed",
                     @$"Hi {notification.Username} your password has changed.
                     If you did not attempt to change it, please contact the customer support ASAP."
