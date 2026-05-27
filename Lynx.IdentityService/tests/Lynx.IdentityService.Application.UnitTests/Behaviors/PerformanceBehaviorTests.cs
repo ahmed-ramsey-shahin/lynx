@@ -78,6 +78,7 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
             _nextMock.Verify(x => x(), Times.Once());
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().Be(expectedResponse);
+            _userServiceMock.Verify(service => service.UserId, Times.AtLeastOnce());
         }
     }
 }
