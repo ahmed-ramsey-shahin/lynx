@@ -1,7 +1,9 @@
 using System.Text.Json;
 using Hangfire;
 using Lynx.IdentityService.Api;
+using Lynx.IdentityService.Api.Services;
 using Lynx.IdentityService.Application;
+using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -10,7 +12,9 @@ var config = builder.Configuration;
 
 builder.Services
     .AddApplicationLayer(config)
-    .AddInfrastructureLayer(config);
+    .AddInfrastructureLayer(config)
+    .AddHttpContextAccessor()
+    .AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
