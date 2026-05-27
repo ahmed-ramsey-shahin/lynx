@@ -15,7 +15,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.EventHandlers
                     notification.Username,
                     "Your password has changed",
                     @$"Hi {notification.Username} your password has changed.
-                    If you did not attempt to change it, please contact the customer support ASAP."
+If you did not attempt to change it, please contact the customer support ASAP."
                 ),
                 cancellationToken
             );
