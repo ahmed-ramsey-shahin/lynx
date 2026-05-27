@@ -1,11 +1,13 @@
 using FluentAssertions;
-using Lynx.IdentityService.Application.Common.Repositories;
+using Lynx.IdentityService.Domain.Common;
 using Lynx.IdentityService.Domain.Identity;
 using Lynx.IdentityService.Infrastructure.Data;
 using Lynx.IdentityService.Infrastructure.Data.Configuration;
 using Lynx.IdentityService.Infrastructure.Tests.Fixtures;
+using MediatR;
 using Microsoft.Extensions.Time.Testing;
 using MongoDB.Driver;
+using Moq;
 
 namespace Lynx.IdentityService.Infrastructure.Tests
 {
@@ -13,13 +15,16 @@ namespace Lynx.IdentityService.Infrastructure.Tests
     public class UserRepositoryTests
     {
         private readonly IMongoDatabase _database;
-        private readonly IUserRepository _userRepository;
+        private readonly UserRepository _userRepository;
         private readonly FakeTimeProvider _timeProvider;
+        private readonly Mock<IPublisher> _publisherMock = new(MockBehavior.Strict);
 
         public UserRepositoryTests(DatabaseFixture fixture)
         {
+            _publisherMock.Setup(mock => mock.Publish(It.IsAny<DomainEvent>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
             _timeProvider = new FakeTimeProvider();
-            _userRepository = new UserRepository(fixture.MongoClient);
+            _userRepository = new UserRepository(fixture.MongoClient, _publisherMock.Object);
             _database = fixture.MongoClient.GetDatabase(DbConstants.DbName);
             _database.DropCollection(DbConstants.UserTableName);
             MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(fixture.MongoClient).GetAwaiter().GetResult();
@@ -45,6 +50,12 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             var foundInDb = await collection.Find(u => u.Id == user.Id).FirstOrDefaultAsync();
             foundInDb.Should().NotBeNull();
             foundInDb.Username.Should().Be("lynx_user");
+            _publisherMock.Verify(mock => mock.Publish(It.Is<DomainEvent>(notificiation =>
+                notificiation is UserRegisteredEvent &&
+                ((UserRegisteredEvent) notificiation).Email == "user@lynx.com" &&
+                ((UserRegisteredEvent) notificiation).Username == "lynx_user"
+            ), It.IsAny<CancellationToken>()), Times.Once());
+            user.Events.Should().BeEmpty();
         }
 
         [Fact]
@@ -72,6 +83,8 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             var exception = await act.Should().ThrowAsync<MongoWriteException>();
             exception.Which.WriteError.Category.Should().Be(ServerErrorCategory.DuplicateKey);
             exception.Which.WriteError.Code.Should().Be(11000);
+            user2.Events.Should().HaveCount(1);
+            _publisherMock.Verify(mock => mock.Publish(It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>()), Times.Never());
         }
 
         [Fact]
@@ -99,6 +112,8 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             var exception = await act.Should().ThrowAsync<MongoWriteException>();
             exception.Which.WriteError.Category.Should().Be(ServerErrorCategory.DuplicateKey);
             exception.Which.WriteError.Code.Should().Be(11000);
+            user2.Events.Should().HaveCount(1);
+            _publisherMock.Verify(mock => mock.Publish(It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>()), Times.Never());
         }
 #endregion // ADD_ASYNC_TESTS
 
@@ -185,6 +200,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             foundInDb.Select(user => user.Username)
                 .Should()
                 .BeEquivalentTo(expectedRemainingUsernames);
+            _publisherMock.Verify(mock => mock.Publish(It.IsAny<It.IsAnyType>(), It.IsAny<CancellationToken>()), Times.Never());
         }
 #endregion // DELETE_UNACTIVATED_USERS_TESTS
 
@@ -333,5 +349,65 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             result.Should().BeFalse();
         }
 #endregion // IS_EMAIL_UNIQUE_TESTS
+
+#region UPDATE_ASYNC_TESTS
+        [Fact]
+        public async Task UpdateAsync_Should_UpdateTheUser_WhenParametersAreValid()
+        {
+            // Arrange
+            const string oldUsername = "lynx_user";
+            const string newUsername = "new_lynx_user";
+            var user = User.Create(
+                Guid.NewGuid(),
+                "user@lynx.com",
+                oldUsername,
+                "VeryStrongPassword@123_Hashed"
+            ).Value;
+            user.Activate(DateTime.UtcNow);
+            await _userRepository.AddAsync(user);
+            user.ChangeUsername(newUsername);
+
+            // Act
+            var result = await _userRepository.UpdateAsync(user, default);
+
+            // Assert
+            result.Should().BeTrue();
+            var collection = _database.GetCollection<User>(DbConstants.UserTableName);
+            var foundInDb = await collection.Find(u => u.Id == user.Id).FirstOrDefaultAsync();
+            foundInDb.Should().NotBeNull();
+            foundInDb.Username.Should().Be(newUsername);
+            _publisherMock.Verify(mock => mock.Publish(It.Is<DomainEvent>(notificiation =>
+                notificiation is UsernameChangedEvent &&
+                ((UsernameChangedEvent) notificiation).Email == "user@lynx.com" &&
+                ((UsernameChangedEvent) notificiation).OldUsername == oldUsername &&
+                ((UsernameChangedEvent) notificiation).NewUsername == newUsername
+            ), It.IsAny<CancellationToken>()), Times.Once());
+            user.Events.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task UpdateAsync_Should_ReturnFalseAndPublishNoEvents_WhenUserDoesNotExist()
+        {
+            // Arrange
+            const string oldUsername = "lynx_user";
+            const string newUsername = "new_lynx_user";
+            var user = User.Create(
+                Guid.NewGuid(),
+                "user@lynx.com",
+                oldUsername,
+                "VeryStrongPassword@123_Hashed"
+            ).Value;
+            user.Activate(DateTime.UtcNow);
+            user.ChangeUsername(newUsername);
+
+            // Act
+            var result = await _userRepository.UpdateAsync(user, default);
+
+            // Assert
+            result.Should().BeFalse();
+            _publisherMock.Verify(mock => mock.Publish(It.IsAny<DomainEvent>(), It.IsAny<CancellationToken>()), Times.Never());
+            user.Events.Should().HaveCount(3);
+        }
+#endregion // UPDATE_ASYNC_TESTS
     }
 }
