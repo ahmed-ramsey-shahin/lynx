@@ -1,9 +1,12 @@
 using Lynx.IdentityService.Api.Requests;
+using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Features.Identity.Commands.ActivateUser;
 using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUsername;
 using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUserPassword;
 using Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser;
 using Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser;
+using Lynx.IdentityService.Application.Features.Identity.Commands.PasswordReset;
+using Lynx.IdentityService.Application.Features.Identity.Commands.RequestPasswordReset;
 using Lynx.IdentityService.Application.Features.Identity.Queries.GetUser;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -47,12 +50,13 @@ namespace Lynx.IdentityService.Api.Controllers
         [Authorize]
         public async Task<IActionResult> ChangeUserPassword(
             [FromBody] ChangeUserPasswordRequest request,
+            [FromServices] IUserService userService,
             CancellationToken cancellationToken
         )
         {
             var result = await sender.Send(new ChangeUserPasswordCommand()
             {
-                UserId = request.UserId,
+                UserId = userService.UserId!.Value,
                 NewPassword = request.NewPassword,
                 OldPassword = request.OldPassword
             }, cancellationToken);
@@ -63,12 +67,13 @@ namespace Lynx.IdentityService.Api.Controllers
         [Authorize]
         public async Task<IActionResult> ChangeUsername(
             [FromBody] ChangeUsernameRequest request,
+            [FromServices] IUserService userService,
             CancellationToken cancellationToken
         )
         {
             var result = await sender.Send(new ChangeUsernameCommand()
             {
-                UserId = request.UserId,
+                UserId = userService.UserId!.Value,
                 Password = request.Password,
                 NewUsername = request.NewUsername
             }, cancellationToken);
@@ -76,15 +81,17 @@ namespace Lynx.IdentityService.Api.Controllers
         }
 
         [HttpPost("users/me/deletions")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(
             [FromBody] DeleteUserRequest request,
+            [FromServices] IUserService userService,
             CancellationToken cancellationToken
         )
         {
             var result = await sender.Send(new DeleteUserCommand()
             {
                 Password = request.Password,
-                UserId = request.UserId,
+                UserId = userService.UserId!.Value,
                 HasConfirmed = request.HasConfirmed
             }, cancellationToken);
             return result.Match(_ => NoContent(), Problem);
@@ -99,6 +106,36 @@ namespace Lynx.IdentityService.Api.Controllers
             var result = await sender.Send(new ActivateUserCommand()
             {
                 ActivationCode = request.ActivationCode
+            }, cancellationToken);
+            return result.Match(_ => NoContent(), Problem);
+        }
+
+        [HttpPost("password-reset-requests")]
+        public async Task<IActionResult> RequestPasswordReset(
+            [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
+            [FromBody] RequestPasswordResetRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new RequestPasswordResetCommand()
+            {
+                Email = request.Email,
+                IdempotencyKey = idempotencyKey
+            }, cancellationToken);
+            return result.Match(_ => NoContent(), Problem);
+        }
+
+        [HttpPost("password-resets")]
+        public async Task<IActionResult> PasswordReset(
+            [FromBody] PasswordResetRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new PasswordResetCommand()
+            {
+                Email = request.Email,
+                NewPassword = request.NewPassword,
+                Code = request.Code
             }, cancellationToken);
             return result.Match(_ => NoContent(), Problem);
         }
