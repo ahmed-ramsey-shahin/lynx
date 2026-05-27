@@ -46,23 +46,33 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("{IdempotencyKey} was not found in the cache.", idempotentCommand.IdempotencyKey);
 
-            var result = await next(cancellationToken);
-
-            if (result.IsError)
+            try
             {
-                if (logger.IsEnabled(LogLevel.Error))
-                    logger.LogError("An error happened during execution of the command. {@Errors}.", result.Errors);
+                var result = await next(cancellationToken);
+                if (result.IsError)
+                {
+                    if (logger.IsEnabled(LogLevel.Error))
+                        logger.LogError("An error happened during execution of the command. {@Errors}.", result.Errors);
 
+                    await cacheService.RemoveAsync(lockKey, cancellationToken);
+                    return result;
+                }
+
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Storing {IdempotencyKey} to cache.", idempotentCommand.IdempotencyKey);
+
+                await cacheService.SetAsync(idempotentCommand.IdempotencyKey, result, TimeSpan.FromMinutes(3), cancellationToken);
                 await cacheService.RemoveAsync(lockKey, cancellationToken);
                 return result;
             }
-
-            if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Storing {IdempotencyKey} to cache.", idempotentCommand.IdempotencyKey);
-
-            await cacheService.SetAsync(idempotentCommand.IdempotencyKey, result, TimeSpan.FromMinutes(3), cancellationToken);
-            await cacheService.RemoveAsync(lockKey, cancellationToken);
-            return result;
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                await cacheService.RemoveAsync(lockKey, cancellationToken);
+            }
         }
     }
 }

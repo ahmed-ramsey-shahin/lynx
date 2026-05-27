@@ -128,6 +128,8 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
             // Assert
             result.Should().NotBeNull();
             result.IsSuccess.Should().BeFalse();
+            result.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be("code");
             _cacheServiceMock.Verify(service => service.GetAsync<Result<TestResponse>>(
                 command.CacheKey,
                 It.IsAny<CancellationToken>()
