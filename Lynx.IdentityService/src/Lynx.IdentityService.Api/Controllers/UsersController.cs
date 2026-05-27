@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Lynx.IdentityService.Api.Requests;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Features.Identity.Commands.ActivateUser;
@@ -20,7 +21,7 @@ namespace Lynx.IdentityService.Api.Controllers
     {
         [HttpPost("users")]
         public async Task<IActionResult> CreateUser(
-            [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
+            [FromHeader(Name = "Idempotency-Key")] [Required] string idempotencyKey,
             [FromBody] CreateUserRequest request,
             CancellationToken cancellationToken
         )
@@ -112,7 +113,7 @@ namespace Lynx.IdentityService.Api.Controllers
 
         [HttpPost("password-reset-requests")]
         public async Task<IActionResult> RequestPasswordReset(
-            [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
+            [FromHeader(Name = "Idempotency-Key")] [Required] string idempotencyKey,
             [FromBody] RequestPasswordResetRequest request,
             CancellationToken cancellationToken
         )
