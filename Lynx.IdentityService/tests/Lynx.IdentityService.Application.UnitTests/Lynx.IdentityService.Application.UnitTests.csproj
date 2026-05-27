@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Lynx.IdentityService.Application\Lynx.IdentityService.Application.csproj" />
+    <ProjectReference Include="..\..\src\Lynx.IdentityService.Contracts\Lynx.IdentityService.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

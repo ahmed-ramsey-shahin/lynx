@@ -1,7 +1,9 @@
+using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
+using Lynx.IdentityService.Contracts;
 using Lynx.IdentityService.Domain.Common.Results;
 using Lynx.IdentityService.Domain.Identity;
 using MediatR;
@@ -14,7 +16,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
         ILogger<CreateUserCommandHandler> logger,
         IUserRepository userRepo,
         IOTPGeneratorService generatorService,
-        IEmailService emailService,
+        IEmailBackgroundQueue emailQueue,
         ICacheService cacheService,
         IOptions<ClientUrlOptions> options,
         IPasswordHashingService hashingService
@@ -54,12 +56,14 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
 
             await userRepo.AddAsync(creationResult.Value, cancellationToken);
             var activationToken = generatorService.GenerateUrlSafeToken();
-            await emailService.SendEmailAsync(
-                request.Email,
-                request.Username,
-                "Lynx Account Activation",
-                $@"Please visit ${options.Value.ActivateAccountUrl} to activate your account.
-                The activation code is: {activationToken}.",
+            await emailQueue.QueueEmailAsync(
+                new EmailJob(
+                    request.Email,
+                    request.Username,
+                    "Lynx Account Activation",
+                    $@"Please visit ${options.Value.ActivateAccountUrl} to activate your account.
+                    The activation code is: {activationToken}."
+                ),
                 cancellationToken
             );
             await cacheService.SetAsync($"activation-codes:{activationToken}", userId, TimeSpan.FromHours(2), cancellationToken);

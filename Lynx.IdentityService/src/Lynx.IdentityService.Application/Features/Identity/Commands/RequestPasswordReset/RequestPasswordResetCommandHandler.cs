@@ -1,6 +1,8 @@
+using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
+using Lynx.IdentityService.Contracts;
 using Lynx.IdentityService.Domain.Common.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -12,7 +14,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
         IUserRepository userRepo,
         ILogger<RequestPasswordResetCommandHandler> logger,
         ICacheService cacheService,
-        IEmailService emailService,
+        IEmailBackgroundQueue emailQueue,
         IOTPGeneratorService otpService,
         IOptions<ClientUrlOptions> options
     ) : IRequestHandler<RequestPasswordResetCommand, Result<Success>>
@@ -30,20 +32,20 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
             }
 
             var otp = otpService.GenerateResetCode();
-            var cacheWriteTask = cacheService.SetAsync($"reset_password_otps:{user.Id}", otp, TimeSpan.FromMinutes(15), cancellationToken);
-            var emailTask = emailService.SendEmailAsync(
-                user.Email,
-                user.Username,
-                "Reset Password OTP",
-                $@"You requested a password reset for your account.
-                The OTP for your password reset is: {otp}
-                Please visit {options.Value.ResetPasswordUrl} to create a new password using the OTP given above.
-                Please ignore this email if you did not request a password reset.
-                ",
+            await cacheService.SetAsync($"reset_password_otps:{user.Id}", otp, TimeSpan.FromMinutes(15), cancellationToken);
+            await emailQueue.QueueEmailAsync(
+                new EmailJob(
+                    user.Email,
+                    user.Username,
+                    "Reset Password OTP",
+                    $@"You requested a password reset for your account.
+                    The OTP for your password reset is: {otp}
+                    Please visit {options.Value.ResetPasswordUrl} to create a new password using the OTP given above.
+                    Please ignore this email if you did not request a password reset.
+                    "
+                ),
                 cancellationToken
             );
-
-            await Task.WhenAll(cacheWriteTask, emailTask);
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("OTP sent to {UserName} on {Email}.", user.Username, user.Email);

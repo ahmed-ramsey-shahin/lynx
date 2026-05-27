@@ -1,10 +1,12 @@
 using FluentAssertions;
+using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
 using Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser;
 using Lynx.IdentityService.Application.UnitTests.MockBuilders;
+using Lynx.IdentityService.Contracts;
 using Lynx.IdentityService.Domain.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -31,7 +33,7 @@ namespace Lynx.IdentityService.Application.UnitTests
         private void CreateHandler(
             IUserRepository userRepo,
             IOTPGeneratorService generatorService,
-            IEmailService emailService,
+            IEmailBackgroundQueue emailQueue,
             ICacheService cacheService,
             IPasswordHashingService hashingService
         )
@@ -40,7 +42,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 _logger.Object,
                 userRepo,
                 generatorService,
-                emailService,
+                emailQueue,
                 cacheService,
                 _options,
                 hashingService
@@ -69,7 +71,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 .WithUniqueUsername(username)
                 .WithSuccessfulDatabaseAdd();
             var otpMock = new OtpGeneratorServiceMockBuilder().WithGenerateUrlSafeToken(urlSafeToken);
-            var emailMock = new EmailServiceMockBuilder().WithSuccessfulSendEmail();
+            var emailMock = new EmailBackgroundQueueMockBuilder().WithSuccessfulQueueEmail();
             var cacheMock = new CacheServiceMockBuilder().WithSuccessfulSet<Guid>();
             var passwordHashMock = new PasswordHashingServiceMockBuilder().WithSuccessfulHash(passwordHash, password);
             CreateHandler(
@@ -89,11 +91,8 @@ namespace Lynx.IdentityService.Application.UnitTests
             userRepoMock.Mock.Verify(repo => repo.IsEmailUniqueAsync(email, It.IsAny<CancellationToken>()), Times.Once());
             userRepoMock.Mock.Verify(repo => repo.IsUsernameUniqueAsync(username, It.IsAny<CancellationToken>()), Times.Once());
             otpMock.Mock.Verify(service => service.GenerateUrlSafeToken(It.IsAny<int>()), Times.Once());
-            emailMock.Mock.Verify(service => service.SendEmailAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
+            emailMock.Mock.Verify(service => service.QueueEmailAsync(
+                It.IsAny<EmailJob>(),
                 It.IsAny<CancellationToken>()
             ), Times.Once());
             cacheMock.Mock.Verify(service => service.SetAsync(
@@ -130,7 +129,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 .WithUniqueUsername(username);
             var otpMock = new OtpGeneratorServiceMockBuilder();
             var cacheMock = new CacheServiceMockBuilder();
-            var emailMock = new EmailServiceMockBuilder();
+            var emailMock = new EmailBackgroundQueueMockBuilder();
             var passwordHashMock = new PasswordHashingServiceMockBuilder();
             CreateHandler(
                 userRepoMock.Object,
@@ -169,7 +168,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 .WithDuplicateUsername(username);
             var otpMock = new OtpGeneratorServiceMockBuilder().WithGenerateUrlSafeToken("");
             var cacheMock = new CacheServiceMockBuilder();
-            var emailMock = new EmailServiceMockBuilder();
+            var emailMock = new EmailBackgroundQueueMockBuilder();
             var passwordHashMock = new PasswordHashingServiceMockBuilder().WithSuccessfulHash("");
             CreateHandler(
                 userRepoMock.Object,
@@ -208,7 +207,7 @@ namespace Lynx.IdentityService.Application.UnitTests
                 .WithUniqueUsername(username);
             var otpMock = new OtpGeneratorServiceMockBuilder().WithGenerateUrlSafeToken("");
             var cacheMock = new CacheServiceMockBuilder();
-            var emailMock = new EmailServiceMockBuilder();
+            var emailMock = new EmailBackgroundQueueMockBuilder();
             var passwordHashMock = new PasswordHashingServiceMockBuilder().WithSuccessfulHash("");
             CreateHandler(
                 userRepoMock.Object,
