@@ -12,32 +12,50 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
     public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager, int maxPoolSize=30) : IRabbitMqChannelPool
     {
         private readonly ConcurrentQueue<IChannel> _pool = new();
+        private readonly SemaphoreSlim _semaphore = new(maxPoolSize, maxPoolSize);
 
         public async ValueTask<IChannel> GetChannelAsync(CancellationToken cancellationToken = default)
         {
-            if (_pool.TryDequeue(out var channel))
+            await _semaphore.WaitAsync(cancellationToken);
+
+            try
             {
-                if (channel.IsOpen)
+                while (_pool.TryDequeue(out var channel))
                 {
-                    return channel;
+                    if (channel.IsOpen)
+                    {
+                        return channel;
+                    }
+
+                    await channel.DisposeAsync();
                 }
 
-                await channel.DisposeAsync();
+                var connection = await connManager.GetConnectionAsync();
+                return await connection.CreateChannelAsync(cancellationToken: cancellationToken);
             }
-
-            var connection = await connManager.GetConnectionAsync();
-            return await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+            catch
+            {
+                _semaphore.Release();
+                throw;
+            }
         }
 
         public void ReturnChannel(IChannel channel)
         {
-            if (channel.IsOpen && _pool.Count < maxPoolSize)
+            try
             {
-                _pool.Enqueue(channel);
+                if (channel.IsOpen)
+                {
+                    _pool.Enqueue(channel);
+                }
+                else
+                {
+                    channel.DisposeAsync();
+                }
             }
-            else
+            finally
             {
-                channel.DisposeAsync().AsTask();
+                _semaphore.Release();
             }
         }
 
@@ -48,6 +66,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
                 await channel.DisposeAsync();
             }
 
+            _semaphore.Dispose();
             GC.SuppressFinalize(this);
         }
     }
