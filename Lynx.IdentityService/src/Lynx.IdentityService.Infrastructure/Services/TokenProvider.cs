@@ -33,7 +33,9 @@ namespace Lynx.IdentityService.Infrastructure.Services
                 Expires = expirationDate,
                 Issuer = options.Value.Issuer,
                 Audience = options.Value.Audience,
-                SigningCredentials = credentials
+                SigningCredentials = credentials,
+                IssuedAt = timeProvider.GetUtcNow().UtcDateTime,
+                NotBefore = timeProvider.GetUtcNow().UtcDateTime
             };
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.CreateToken(tokenDescriptor);
