@@ -9,10 +9,9 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
         void ReturnChannel(IChannel channel);
     }
 
-    public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager) : IRabbitMqChannelPool
+    public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager, int maxPoolSize=30) : IRabbitMqChannelPool
     {
         private readonly ConcurrentQueue<IChannel> _pool = new();
-        private readonly int _maxPoolSize =30;
 
         public async ValueTask<IChannel> GetChannelAsync(CancellationToken cancellationToken = default)
         {
@@ -32,7 +31,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
 
         public void ReturnChannel(IChannel channel)
         {
-            if (channel.IsOpen && _pool.Count < _maxPoolSize)
+            if (channel.IsOpen && _pool.Count < maxPoolSize)
             {
                 _pool.Enqueue(channel);
             }
