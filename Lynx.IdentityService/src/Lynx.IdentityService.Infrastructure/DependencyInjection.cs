@@ -1,5 +1,7 @@
+using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
+using Lynx.IdentityService.Infrastructure.BackgroundJobs;
 using Lynx.IdentityService.Infrastructure.Data;
 using Lynx.IdentityService.Infrastructure.Data.Configuration;
 using Lynx.IdentityService.Infrastructure.Exceptions;
@@ -79,7 +81,9 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddTransient<IPasswordHashingService>(_ => new PasswordHashingService(passwordPepper))
                 .AddTransient<ITokenProvider, TokenProvider>()
                 .AddSingleton(TimeProvider.System)
-                .AddRabbitMQ(rabbitMqConnectionString);
+                .AddRabbitMQ(rabbitMqConnectionString)
+                .AddSingleton<IEmailBackgroundQueue, EmailBackgroundQueue>()
+                .AddHostedService<EmailBackgroundWorker>();
             return services;
         }
     }

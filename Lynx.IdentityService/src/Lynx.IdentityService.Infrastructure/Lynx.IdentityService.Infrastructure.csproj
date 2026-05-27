@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Lynx.IdentityService.Application\Lynx.IdentityService.Application.csproj" />
     <ProjectReference Include="..\Lynx.IdentityService.Domain\Lynx.IdentityService.Domain.csproj" />
+    <ProjectReference Include="..\Lynx.IdentityService.Contracts\Lynx.IdentityService.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
