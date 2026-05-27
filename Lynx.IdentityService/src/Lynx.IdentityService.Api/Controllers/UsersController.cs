@@ -1,4 +1,6 @@
 using Lynx.IdentityService.Api.Requests;
+using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUsername;
+using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUserPassword;
 using Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser;
 using Lynx.IdentityService.Application.Features.Identity.Queries.GetUser;
 using MediatR;
@@ -37,6 +39,38 @@ namespace Lynx.IdentityService.Api.Controllers
         {
             var result = await sender.Send(new GetUserQuery(), cancellationToken);
             return result.Match(Ok, Problem);
+        }
+
+        [HttpPut("me/password")]
+        [Authorize]
+        public async Task<IActionResult> ChangeUserPassword(
+            [FromBody] ChangeUserPasswordRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new ChangeUserPasswordCommand()
+            {
+                UserId = request.UserId,
+                NewPassword = request.NewPassword,
+                OldPassword = request.OldPassword
+            }, cancellationToken);
+            return result.Match(_ => NoContent(), Problem);
+        }
+
+        [HttpPut("me/username")]
+        [Authorize]
+        public async Task<IActionResult> ChangeUsername(
+            [FromBody] ChangeUsernameRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new ChangeUsernameCommand()
+            {
+                UserId = request.UserId,
+                Password = request.Password,
+                NewUsername = request.NewUsername
+            }, cancellationToken);
+            return result.Match(_ => NoContent(), Problem);
         }
     }
 }
