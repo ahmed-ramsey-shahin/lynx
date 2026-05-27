@@ -8,6 +8,7 @@ using Lynx.IdentityService.Infrastructure.Exceptions;
 using Lynx.IdentityService.Infrastructure.Services;
 using Lynx.IdentityService.Infrastructure.Services.RabbitMq;
 using Lynx.IdentityService.Infrastructure.Settings;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -22,6 +23,20 @@ namespace Lynx.IdentityService.Infrastructure
             MongoDbConfiguration.ConfigureMappings();
             var client = services.GetRequiredService<IMongoClient>();
             await MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(client);
+        }
+
+        public static IApplicationBuilder UseCoreMiddlewares(this IApplicationBuilder app, IConfiguration configuration)
+        {
+            app.UseExceptionHandler();
+            app.UseStatusCodePages();
+            app.UseHttpsRedirection();
+            app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
+            app.UseRateLimiter();
+            app.UseAuthentication();
+            app.UseAuthorization();
+            app.UseOutputCache();
+            app.UseBackgroundJobs();
+            return app;
         }
 
         private static IServiceCollection AddMongoDb(this IServiceCollection services, string connectionString)
@@ -65,6 +80,11 @@ namespace Lynx.IdentityService.Infrastructure
             return services;
         }
 
+        private static IServiceCollection AddHangfireJobs(this IServiceCollection services)
+        {
+            return services;
+        }
+
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
             var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings::MongoDB");
@@ -83,7 +103,8 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddSingleton(TimeProvider.System)
                 .AddRabbitMQ(rabbitMqConnectionString)
                 .AddSingleton<IEmailBackgroundQueue, EmailBackgroundQueue>()
-                .AddHostedService<EmailBackgroundWorker>();
+                .AddHostedService<EmailBackgroundWorker>()
+                .AddHangfireJobs();
             return services;
         }
     }

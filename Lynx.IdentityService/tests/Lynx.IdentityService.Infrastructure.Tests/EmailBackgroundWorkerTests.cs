@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Contracts;

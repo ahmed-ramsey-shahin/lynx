@@ -1,3 +1,4 @@
+using Hangfire;
 using Lynx.IdentityService.Application;
 using Lynx.IdentityService.Infrastructure;
 
@@ -9,6 +10,17 @@ builder.Services
     .AddInfrastructureLayer(config);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [],
+    });
+}
+
+app.UseCoreMiddlewares(app.Configuration);
 await app.Services.ConfigureMongoDbAsync();
 
 app.Run();
