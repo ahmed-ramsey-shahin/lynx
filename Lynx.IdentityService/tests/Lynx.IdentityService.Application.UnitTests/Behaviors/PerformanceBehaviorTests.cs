@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Lynx.IdentityService.Application.Common.Behaviors;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Domain.Common.Results;
@@ -42,6 +43,9 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
                 It.Is<Exception>(_ => true),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ), Times.Never());
+            _nextMock.Verify(x => x(), Times.Once());
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(expectedResponse);
         }
 
         [Fact]
@@ -71,6 +75,9 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
                 It.Is<Exception>(_ => true),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()
             ), Times.AtLeastOnce());
+            _nextMock.Verify(x => x(), Times.Once());
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(expectedResponse);
         }
     }
 }
