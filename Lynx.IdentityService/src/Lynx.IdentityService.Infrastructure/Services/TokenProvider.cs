@@ -17,7 +17,7 @@ namespace Lynx.IdentityService.Infrastructure.Services
     {
         public TokenDto? GenerateJwtToken(UserDto user)
         {
-            var expirationDate = timeProvider.GetUtcNow().AddMinutes(options.Value.ExpiryMinutes).DateTime;
+            var expirationDate = timeProvider.GetUtcNow().AddMinutes(options.Value.ExpiryMinutes).UtcDateTime;
             using var rsa = RSA.Create();
             rsa.ImportFromPem(options.Value.PrivateKey);
             var securityKey = new RsaSecurityKey(rsa);
