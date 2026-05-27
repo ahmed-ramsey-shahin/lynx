@@ -11,12 +11,12 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
     {
         private readonly Mock<ILogger<ValidationBehavior<TestCommand, Result<TestResponse>>>> _logger = new(MockBehavior.Loose);
         private readonly Mock<RequestHandlerDelegate<Result<TestResponse>>> _nextMock = new(MockBehavior.Strict);
-        private TestCommandValidator? _validtor = new();
+        private TestCommandValidator? _validator = new();
         private ValidationBehavior<TestCommand, Result<TestResponse>> _behavior;
 
         public ValidationBehaviorTests()
         {
-            _behavior = new(_logger.Object, _validtor);
+            _behavior = new(_logger.Object, _validator);
         }
 
         [Fact]
@@ -27,8 +27,8 @@ namespace Lynx.IdentityService.Application.UnitTests.Behaviors
             var expectedResponse = new TestResponse(3);
             var expectedResult = (Result<TestResponse>) expectedResponse;
             _nextMock.Setup(x => x()).ReturnsAsync(expectedResult);
-            _validtor = null;
-            _behavior = new(_logger.Object, _validtor);
+            _validator = null;
+            _behavior = new(_logger.Object, _validator);
 
             // Act
             var result = await _behavior.Handle(command, _nextMock.Object, default);
