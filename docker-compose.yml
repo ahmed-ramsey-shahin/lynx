@@ -1,4 +1,25 @@
 services:
+  identity-lynx:
+    image: ahmedramseyshahin/identity-lynx:latest
+    container_name: identity-lynx
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Secret=${JwtSettings__Secret}
+      - Security__PasswordPepper=${Security__PasswordPepper}
+      - Email__ApiKey=${Email__ApiKey}
+      - ConnectionStrings__Redis=redis:6379,abortConnect=false
+      - ConnectionStrings__MongoDB=mongodb://${USERS_DB_USERNAME}:${USERS_DB_PASSWORD}@users-db:27017
+      - ConnectionStrings__RabbitMQ=amqp://${IDENTITY_SVC_USER}:${IDENTITY_SVC_PASS}@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+      - users-db
+      - redis
+    ports:
+      - "8080:8080"
+    networks:
+      - lynx-net
   rabbitmq-setup:
     image: curlimages/curl:latest
     container_name: rabbitmq-setup
@@ -73,12 +94,24 @@ services:
     restart: unless-stopped
     networks:
        - lynx-net
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - lynx-net
+    volumes:
+      - redis-data:/data
 
 volumes:
   analytics-db-data:
   analytics-db-config:
   users-db-data:
   rabbitmq-data:
+  redis-data:
 
 networks:
   lynx-net:
