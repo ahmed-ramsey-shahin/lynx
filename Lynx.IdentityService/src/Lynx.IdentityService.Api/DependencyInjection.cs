@@ -17,6 +17,5 @@ namespace Lynx.IdentityService.Api
             app.UseBackgroundJobs();
             return app;
         }
-
     }
 }

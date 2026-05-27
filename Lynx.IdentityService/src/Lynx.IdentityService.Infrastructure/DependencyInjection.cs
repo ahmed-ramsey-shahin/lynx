@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Hangfire;
 using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Repositories;
@@ -9,8 +10,10 @@ using Lynx.IdentityService.Infrastructure.Exceptions;
 using Lynx.IdentityService.Infrastructure.Services;
 using Lynx.IdentityService.Infrastructure.Services.RabbitMq;
 using Lynx.IdentityService.Infrastructure.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using StackExchange.Redis;
 
@@ -92,6 +95,33 @@ namespace Lynx.IdentityService.Infrastructure
             return services;
         }
 
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
+        {
+            var jwtSettings = config.GetSection("JwtSettings").Get<JwtSettings>() ?? throw new InfrastructureConfigurationException("JwtSettings");
+            var rsa = RSA.Create();
+            rsa.ImportFromPem(jwtSettings.PrivateKey);
+            var securityKey = new RsaSecurityKey(rsa);
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = securityKey,
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(5)
+                };
+            });
+            return services;
+        }
+
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
             var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings::MongoDB");
@@ -112,7 +142,8 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddSingleton<IEmailBackgroundQueue, EmailBackgroundQueue>()
                 .AddHostedService<EmailBackgroundWorker>()
                 .AddHangfireJobs()
-                .AddLynxHealthChecks(redisConnectionString);
+                .AddLynxHealthChecks(redisConnectionString)
+                .AddJwtAuthentication(config);
             return services;
         }
     }
