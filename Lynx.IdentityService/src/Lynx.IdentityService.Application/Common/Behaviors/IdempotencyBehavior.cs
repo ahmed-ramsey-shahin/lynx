@@ -54,7 +54,6 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
                     if (logger.IsEnabled(LogLevel.Error))
                         logger.LogError("An error happened during execution of the command. {@Errors}.", result.Errors);
 
-                    await cacheService.RemoveAsync(lockKey, cancellationToken);
                     return result;
                 }
 
@@ -62,7 +61,6 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
                     logger.LogInformation("Storing {IdempotencyKey} to cache.", idempotentCommand.IdempotencyKey);
 
                 await cacheService.SetAsync(idempotentCommand.IdempotencyKey, result, TimeSpan.FromMinutes(3), cancellationToken);
-                await cacheService.RemoveAsync(lockKey, cancellationToken);
                 return result;
             }
             catch (Exception)
