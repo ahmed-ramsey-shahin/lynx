@@ -98,8 +98,9 @@ namespace Lynx.IdentityService.Infrastructure
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
         {
             var jwtSettings = config.GetSection("JwtSettings").Get<JwtSettings>() ?? throw new InfrastructureConfigurationException("JwtSettings");
+            var formattedPem = jwtSettings.PrivateKey.Replace("\\n", "\n");
             var rsa = RSA.Create();
-            rsa.ImportFromPem(jwtSettings.PrivateKey);
+            rsa.ImportFromPem(formattedPem);
             var securityKey = new RsaSecurityKey(rsa);
             services.AddAuthentication(options =>
             {

@@ -82,7 +82,7 @@ services:
     networks:
       - lynx-net
   users-db:
-    image: mongodb/mongodb-community-server:latest
+    image: mongo:7.0
     container_name: users-db
     ports:
       - "27017:27017"

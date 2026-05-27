@@ -18,8 +18,9 @@ namespace Lynx.IdentityService.Infrastructure.Services
         public TokenDto? GenerateJwtToken(UserDto user)
         {
             var expirationDate = timeProvider.GetUtcNow().AddMinutes(options.Value.ExpiryMinutes).UtcDateTime;
+            var formattedPem = options.Value.PrivateKey.Replace("\\n", "\n");
             using var rsa = RSA.Create();
-            rsa.ImportFromPem(options.Value.PrivateKey);
+            rsa.ImportFromPem(formattedPem);
             var securityKey = new RsaSecurityKey(rsa);
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
             List<Claim> claims = [
@@ -52,7 +53,8 @@ namespace Lynx.IdentityService.Infrastructure.Services
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
             using var rsa = RSA.Create();
-            rsa.ImportFromPem(options.Value.PrivateKey);
+            var formattedPem = options.Value.PrivateKey.Replace("\\n", "\n");
+            rsa.ImportFromPem(formattedPem);
             var securityKey = new RsaSecurityKey(rsa);
             var tokenValidationParameters = new TokenValidationParameters
             {
