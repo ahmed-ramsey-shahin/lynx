@@ -17,7 +17,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
         {
             if (request is not ICachedQuery cachedQuery)
             {
-                return await next(cancellationToken);
+                return await next();
             }
 
             if (logger.IsEnabled(LogLevel.Information))
@@ -36,7 +36,7 @@ namespace Lynx.IdentityService.Application.Common.Behaviors
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("{CacheKey} was not found in cache.", cachedQuery.CacheKey);
 
-            var result = await next(cancellationToken);
+            var result = await next();
 
             if (result.IsError)
             {

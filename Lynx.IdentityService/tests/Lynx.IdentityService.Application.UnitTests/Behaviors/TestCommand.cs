@@ -1,11 +1,15 @@
 using FluentValidation;
 using Lynx.IdentityService.Application.Common.Interfaces;
+using Lynx.IdentityService.Domain.Common.Results;
+using MediatR;
 
 namespace Lynx.IdentityService.Application.UnitTests.Behaviors
 {
     public record TestResponse(int Id);
 
-    public record TestCommand(string Name, string IdempotencyKey) : ICachedQuery<TestResponse>, IIdempotentCommand
+    public record RegularCommand : IRequest;
+
+    public record TestCommand(string Name, string IdempotencyKey) : ICachedQuery<Result<TestResponse>>, IIdempotentCommand
     {
         public string CacheKey => "TestCacheKey";
 
