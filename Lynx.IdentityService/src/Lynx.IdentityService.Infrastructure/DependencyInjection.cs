@@ -1,3 +1,4 @@
+using Hangfire;
 using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
@@ -8,7 +9,6 @@ using Lynx.IdentityService.Infrastructure.Exceptions;
 using Lynx.IdentityService.Infrastructure.Services;
 using Lynx.IdentityService.Infrastructure.Services.RabbitMq;
 using Lynx.IdentityService.Infrastructure.Settings;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -23,20 +23,6 @@ namespace Lynx.IdentityService.Infrastructure
             MongoDbConfiguration.ConfigureMappings();
             var client = services.GetRequiredService<IMongoClient>();
             await MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(client);
-        }
-
-        public static IApplicationBuilder UseCoreMiddlewares(this IApplicationBuilder app, IConfiguration configuration)
-        {
-            app.UseExceptionHandler();
-            app.UseStatusCodePages();
-            app.UseHttpsRedirection();
-            app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
-            app.UseRateLimiter();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseOutputCache();
-            app.UseBackgroundJobs();
-            return app;
         }
 
         private static IServiceCollection AddMongoDb(this IServiceCollection services, string connectionString)
@@ -82,6 +68,27 @@ namespace Lynx.IdentityService.Infrastructure
 
         private static IServiceCollection AddHangfireJobs(this IServiceCollection services)
         {
+            services.AddHangfireServer();
+            return services;
+        }
+
+        private static IServiceCollection AddLynxHealthChecks(
+            this IServiceCollection services,
+            string redisConnectionString
+        )
+        {
+            services.AddHealthChecks()
+                .AddMongoDb(
+                    name: "MongoDB",
+                    tags: ["ready", "database"]
+                ).AddRabbitMQ(
+                    name: "RabbitMQ",
+                    tags: ["ready", "message-broker"]
+                ).AddRedis(
+                    redisConnectionString,
+                    name: "Redis",
+                    tags: ["ready", "cache"]
+                );
             return services;
         }
 
@@ -104,7 +111,8 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddRabbitMQ(rabbitMqConnectionString)
                 .AddSingleton<IEmailBackgroundQueue, EmailBackgroundQueue>()
                 .AddHostedService<EmailBackgroundWorker>()
-                .AddHangfireJobs();
+                .AddHangfireJobs()
+                .AddLynxHealthChecks(redisConnectionString);
             return services;
         }
     }
