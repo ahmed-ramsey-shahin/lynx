@@ -151,7 +151,8 @@ namespace Lynx.IdentityService.Infrastructure
                 .AddHostedService<EmailBackgroundWorker>()
                 .AddHangfireJobs(redisConnectionString)
                 .AddLynxHealthChecks(redisConnectionString)
-                .AddJwtAuthentication(config);
+                .AddJwtAuthentication(config)
+                .AddAuthorization();
             return services;
         }
     }
