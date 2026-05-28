@@ -9,7 +9,7 @@ namespace Lynx.IdentityService.Api
             app.UseExceptionHandler();
             app.UseStatusCodePages();
             app.UseHttpsRedirection();
-            app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseBackgroundJobs();

@@ -16,6 +16,7 @@ builder.Services
     .AddHttpContextAccessor()
     .AddScoped<IUserService, UserService>()
     .AddControllers();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
