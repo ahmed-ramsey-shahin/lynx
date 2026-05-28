@@ -10,7 +10,6 @@ namespace Lynx.IdentityService.Api
             app.UseStatusCodePages();
             app.UseHttpsRedirection();
             app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
-            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseOutputCache();
