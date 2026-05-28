@@ -14,7 +14,8 @@ builder.Services
     .AddApplicationLayer(config)
     .AddInfrastructureLayer(config)
     .AddHttpContextAccessor()
-    .AddScoped<IUserService, UserService>();
+    .AddScoped<IUserService, UserService>()
+    .AddControllers();
 
 var app = builder.Build();
 
