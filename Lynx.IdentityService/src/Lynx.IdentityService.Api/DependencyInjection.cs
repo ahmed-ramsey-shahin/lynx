@@ -12,7 +12,6 @@ namespace Lynx.IdentityService.Api
             app.UseCors(configuration["AppSettings:CorsPolicyName"]!);
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseOutputCache();
             app.UseBackgroundJobs();
             return app;
         }
