@@ -6,7 +6,9 @@ using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUsername
 using Lynx.IdentityService.Application.Features.Identity.Commands.ChangeUserPassword;
 using Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser;
 using Lynx.IdentityService.Application.Features.Identity.Commands.DeleteUser;
+using Lynx.IdentityService.Application.Features.Identity.Commands.GenerateToken;
 using Lynx.IdentityService.Application.Features.Identity.Commands.PasswordReset;
+using Lynx.IdentityService.Application.Features.Identity.Commands.RefreshToken;
 using Lynx.IdentityService.Application.Features.Identity.Commands.RequestPasswordReset;
 using Lynx.IdentityService.Application.Features.Identity.Queries.GetUser;
 using MediatR;
@@ -139,6 +141,34 @@ namespace Lynx.IdentityService.Api.Controllers
                 Code = request.Code
             }, cancellationToken);
             return result.Match(_ => NoContent(), Problem);
+        }
+
+        [HttpPost("tokens")]
+        public async Task<IActionResult> Login(
+            [FromBody] LoginRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new GenerateTokenCommand()
+            {
+                Username = request.Username,
+                Password = request.Password
+            }, cancellationToken);
+            return result.Match(Ok, Problem);
+        }
+
+        [HttpPut("tokens")]
+        public async Task<IActionResult> RefreshToken(
+            [FromBody] RefreshTokenRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await sender.Send(new RefreshTokenCommand()
+            {
+                ExpiredAccessToken = request.ExpiredAccessToken,
+                RefreshToken = request.RefreshToken
+            }, cancellationToken);
+            return result.Match(Ok, Problem);
         }
     }
 }
