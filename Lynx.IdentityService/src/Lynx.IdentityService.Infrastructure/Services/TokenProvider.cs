@@ -21,7 +21,10 @@ namespace Lynx.IdentityService.Infrastructure.Services
             var formattedPem = options.Value.PrivateKey.Replace("\\n", "\n");
             using var rsa = RSA.Create();
             rsa.ImportFromPem(formattedPem);
-            var securityKey = new RsaSecurityKey(rsa);
+            var securityKey = new RsaSecurityKey(rsa)
+            {
+                CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
+            };
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
             List<Claim> claims = [
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
@@ -55,7 +58,10 @@ namespace Lynx.IdentityService.Infrastructure.Services
             using var rsa = RSA.Create();
             var formattedPem = options.Value.PrivateKey.Replace("\\n", "\n");
             rsa.ImportFromPem(formattedPem);
-            var securityKey = new RsaSecurityKey(rsa);
+            var securityKey = new RsaSecurityKey(rsa)
+            {
+                CryptoProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = false }
+            };
             var tokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
