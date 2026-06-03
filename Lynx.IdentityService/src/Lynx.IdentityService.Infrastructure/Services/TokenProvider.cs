@@ -56,7 +56,7 @@ namespace Lynx.IdentityService.Infrastructure.Services
         public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
             using var rsa = RSA.Create();
-            var formattedPem = options.Value.PrivateKey.Replace("\\n", "\n");
+            var formattedPem = options.Value.PublicKey.Replace("\\n", "\n");
             rsa.ImportFromPem(formattedPem);
             var securityKey = new RsaSecurityKey(rsa)
             {
@@ -89,7 +89,8 @@ namespace Lynx.IdentityService.Infrastructure.Services
         public JsonWebKey GetPublicKeyJwk()
         {
             using var rsa = RSA.Create();
-            rsa.ImportFromPem(options.Value.PrivateKey);
+            var formattedPem = options.Value.PublicKey.Replace("\\n", "\n");
+            rsa.ImportFromPem(formattedPem);
             var securityKey = new RsaSecurityKey(rsa)
             {
                 KeyId = "lynx-auth-key-1"
