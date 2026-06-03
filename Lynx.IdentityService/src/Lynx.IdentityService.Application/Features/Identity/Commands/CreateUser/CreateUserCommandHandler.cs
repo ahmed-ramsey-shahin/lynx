@@ -55,7 +55,7 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.CreateUser
             }
 
             await userRepo.AddAsync(creationResult.Value, cancellationToken);
-            var activationToken = generatorService.GenerateUrlSafeToken();
+            var activationToken = generatorService.GenerateUrlSafeToken(64);
             await emailQueue.QueueEmailAsync(
                 new EmailJob(
                     request.Email,
