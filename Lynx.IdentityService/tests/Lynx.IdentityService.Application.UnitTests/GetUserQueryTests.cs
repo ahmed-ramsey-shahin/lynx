@@ -33,11 +33,11 @@ namespace Lynx.IdentityService.Application.UnitTests
                 "StrongPasswordHash"
             ).Value;
             user.Activate(DateTimeOffset.UtcNow);
-            var userRepo = new UserRepositoryMockBuilder().WithUserByUsername(username, user);
+            var userRepo = new UserRepositoryMockBuilder().WithUserById(userId, user);
             var userService = new UserServiceMockBuilder().WithId(userId);
             var request = new GetUserQuery()
             {
-                Username = username
+                UserId = userId.ToString()
             };
             CreateHandler(userRepo.Object, userService.Object);
 
@@ -47,7 +47,7 @@ namespace Lynx.IdentityService.Application.UnitTests
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Username.Should().Be(username);
-            userRepo.Mock.Verify(repo => repo.GetUserByUsernameAsync(username, It.IsAny<CancellationToken>()), Times.Once());
+            userRepo.Mock.Verify(repo => repo.GetUserByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once());
             userService.Mock.Verify(service => service.UserId, Times.AtLeastOnce());
         }
 
@@ -57,11 +57,11 @@ namespace Lynx.IdentityService.Application.UnitTests
             // Arrange
             var userId = Guid.NewGuid();
             const string username = "awesome_username";
-            var userRepo = new UserRepositoryMockBuilder().WithUserByUsername(username, null);
+            var userRepo = new UserRepositoryMockBuilder().WithUserById(userId, null);
             var userService = new UserServiceMockBuilder().WithId(userId);
             var request = new GetUserQuery()
             {
-                Username = username
+                UserId = userId.ToString()
             };
             CreateHandler(userRepo.Object, userService.Object);
 
@@ -72,38 +72,7 @@ namespace Lynx.IdentityService.Application.UnitTests
             result.IsSuccess.Should().BeFalse();
             result.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(ApplicationErrors.UserNotFound.Code);
-            userRepo.Mock.Verify(repo => repo.GetUserByUsernameAsync(username, It.IsAny<CancellationToken>()), Times.Once());
-        }
-
-        [Fact]
-        public async Task Handler_Should_ReturnUserNotOwned_WhenUserIdIsDifferentThanAuthenticatedUser()
-        {
-            // Arrange
-            var userId = Guid.NewGuid();
-            const string username = "awesome_username";
-            var user = User.Create(
-                userId,
-                "email@lynx.com",
-                username,
-                "StrongPasswordHash"
-            ).Value;
-            user.Activate(DateTimeOffset.UtcNow);
-            var userRepo = new UserRepositoryMockBuilder().WithUserByUsername(username, user);
-            var userService = new UserServiceMockBuilder().WithId(Guid.NewGuid());
-            var request = new GetUserQuery()
-            {
-                Username = username
-            };
-            CreateHandler(userRepo.Object, userService.Object);
-
-            // Act
-            var result = await _handler!.Handle(request, default);
-
-            // Assert
-            result.IsSuccess.Should().BeFalse();
-            result.Errors.Should().ContainSingle()
-                .Which.Code.Should().Be(ApplicationErrors.UserNotOwned.Code);
-            userService.Mock.Verify(service => service.UserId, Times.AtLeastOnce());
+            userRepo.Mock.Verify(repo => repo.GetUserByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once());
         }
     }
 }

@@ -16,20 +16,14 @@ namespace Lynx.IdentityService.Application.Features.Identity.Queries.GetUser
     {
         public async Task<Result<UserDto>> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
-            var user = await userRepo.GetUserByUsernameAsync(request.Username, cancellationToken);
+            var user = await userRepo.GetUserByIdAsync(userService.UserId!.Value, cancellationToken);
 
             if (user is null)
             {
                 if (logger.IsEnabled(LogLevel.Information))
-                    logger.LogInformation("No user was found with {Username}.", request.Username);
+                    logger.LogInformation("No user was found with {UserId}.", userService.UserId);
 
                 return ApplicationErrors.UserNotFound;
-            }
-
-            if (userService.UserId != user.Id)
-            {
-                logger.LogWarning("Could not complete request the authenticated user");
-                return ApplicationErrors.UserNotOwned;
             }
 
             return new UserDto

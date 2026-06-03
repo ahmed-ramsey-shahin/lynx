@@ -6,9 +6,9 @@ namespace Lynx.IdentityService.Application.Features.Identity.Queries.GetUser
 {
     public sealed record GetUserQuery : ICachedQuery<Result<UserDto>>
     {
-        public string Username { get; init; } = null!;
+        public string UserId { get; init; } = null!;
 
-        public string CacheKey => $"users:{Username}";
+        public string CacheKey => $"users:{UserId}";
 
         public TimeSpan Expiration => TimeSpan.FromHours(1);
     }

@@ -43,9 +43,15 @@ namespace Lynx.IdentityService.Api.Controllers
 
         [HttpGet("users/me")]
         [Authorize]
-        public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUser(
+            [FromServices] IUserService userService,
+            CancellationToken cancellationToken
+        )
         {
-            var result = await sender.Send(new GetUserQuery(), cancellationToken);
+            var result = await sender.Send(new GetUserQuery()
+            {
+                UserId = userService.UserId!.Value.ToString()
+            }, cancellationToken);
             return result.Match(Ok, Problem);
         }
 
