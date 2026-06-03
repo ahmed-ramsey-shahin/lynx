@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Lynx.IdentityService.Application.Common.Services;
 
 namespace Lynx.IdentityService.Api.Services
@@ -10,7 +10,7 @@ namespace Lynx.IdentityService.Api.Services
             get
             {
                 var claimsPrincipal = contextAccessor.HttpContext?.User;
-                var userIdString = claimsPrincipal?.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+                var userIdString = claimsPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (Guid.TryParse(userIdString, out var userId))
                 {
