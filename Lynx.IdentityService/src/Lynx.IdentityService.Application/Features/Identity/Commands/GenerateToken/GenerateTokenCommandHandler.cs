@@ -3,6 +3,7 @@ using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Features.Identity.Dtos;
 using Lynx.IdentityService.Domain.Common.Results;
+using Lynx.IdentityService.Domain.Identity;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +27,13 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.GenerateTo
                     logger.LogError("User {Username} not found.", request.Username);
 
                 return ApplicationErrors.CredentialsInvalid;
+            }
+
+            if (!user.IsActivated)
+            {
+                if (logger.IsEnabled(LogLevel.Warning))
+                    logger.LogWarning("{UserId} is not activated.", user.Id);
+                return UserErrors.NotActivated;
             }
 
             if (!hashingService.Verify(request.Password, user.Password))

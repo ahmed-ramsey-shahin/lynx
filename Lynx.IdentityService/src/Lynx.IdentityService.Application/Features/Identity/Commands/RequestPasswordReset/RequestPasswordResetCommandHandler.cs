@@ -4,6 +4,7 @@ using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
 using Lynx.IdentityService.Contracts;
 using Lynx.IdentityService.Domain.Common.Results;
+using Lynx.IdentityService.Domain.Identity;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -29,6 +30,13 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
                     logger.LogError("No user was found with {Email}.", request.Email);
 
                 return Result.Success;
+            }
+
+            if (!user.IsActivated)
+            {
+                if (logger.IsEnabled(LogLevel.Warning))
+                    logger.LogWarning("{UserId} is not activated.", user.Id);
+                return UserErrors.NotActivated;
             }
 
             var otp = otpService.GenerateResetCode();
