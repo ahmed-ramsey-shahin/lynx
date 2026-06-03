@@ -11,7 +11,7 @@ namespace Lynx.IdentityService.Domain.Identity
         public string Password { get; private set; } = null!;
         public bool IsActivated { get; private set; }
         public DateTimeOffset? ActivationDate { get; private set; }
-        private readonly List<RefreshToken> _refreshTokens = [];
+        private List<RefreshToken> _refreshTokens = [];
         public IReadOnlyList<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
         private User()

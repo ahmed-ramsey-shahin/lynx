@@ -23,6 +23,18 @@ namespace Lynx.IdentityService.Infrastructure.Data.Configuration
                 {
                     cm.AutoMap();
                     cm.MapIdProperty(user => user.Id).SetIdGenerator(GuidGenerator.Instance);
+                    cm.MapField("_refreshTokens").SetElementName("RefreshTokens");
+                });
+            }
+
+            if (!BsonClassMap.IsClassMapRegistered(typeof(RefreshToken)))
+            {
+                BsonClassMap.RegisterClassMap<RefreshToken>(cm =>
+                {
+                    cm.AutoMap();
+                    cm.MapProperty(rt => rt.Token);
+                    cm.MapProperty(rt => rt.ExpiresOn);
+                    cm.MapProperty(rt => rt.IsRevoked);
                 });
             }
         }
