@@ -2,6 +2,7 @@ using Lynx.IdentityService.Application.Common.BackgroundJobs;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Contracts;
 using Lynx.IdentityService.Infrastructure.BackgroundJobs;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -12,6 +13,9 @@ namespace Lynx.IdentityService.Infrastructure.Tests
         private readonly IEmailBackgroundQueue _emailQueue = new EmailBackgroundQueue();
         private readonly Mock<IEmailService> _emailServiceMock = new(MockBehavior.Strict);
         private readonly Mock<ILogger<EmailBackgroundWorker>> _loggerMock = new(MockBehavior.Loose);
+        private readonly Mock<IServiceScopeFactory> _scopeFactoryMock = new(MockBehavior.Loose);
+        private readonly Mock<IServiceScope> _scopeMock = new(MockBehavior.Loose);
+        private readonly Mock<IServiceProvider> _serviceProviderMock = new(MockBehavior.Loose);
         private readonly EmailBackgroundWorker _emailWorker;
 
         public EmailBackgroundWorkerTests()
@@ -23,7 +27,13 @@ namespace Lynx.IdentityService.Infrastructure.Tests
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>()
             )).Returns(Task.CompletedTask);
-            _emailWorker = new(_emailQueue, _emailServiceMock.Object, _loggerMock.Object);
+            _serviceProviderMock.Setup(sp => sp.GetService(typeof(IEmailService)))
+                .Returns(_emailServiceMock.Object);
+            _scopeMock.Setup(s => s.ServiceProvider)
+                .Returns(_serviceProviderMock.Object);
+            _scopeFactoryMock.Setup(sf => sf.CreateScope())
+                .Returns(_scopeMock.Object);
+            _emailWorker = new(_emailQueue, _scopeFactoryMock.Object, _loggerMock.Object);
         }
 
         [Fact]
