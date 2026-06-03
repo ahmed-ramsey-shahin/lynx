@@ -29,7 +29,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
                 PrivateKey = _validPrivatePem,
                 Issuer = "LynxTestIssuer",
                 Audience = "LynxTestAudience",
-                ExpiryMinutes = 15
+                ExpiryInMinutes = 15
             };
             _timeProvider = new FakeTimeProvider();
             _generatorService = new(MockBehavior.Strict);
@@ -50,7 +50,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             _generatorService.Setup(service => service.GenerateUrlSafeToken(64)).Returns(expectedRefreshToken);
             var now = new DateTimeOffset(2026, 5, 27, 16, 0, 0, TimeSpan.Zero);
             _timeProvider.SetUtcNow(now);
-            var expectedExpiresAt = now.AddMinutes(_jwtSettings.ExpiryMinutes);
+            var expectedExpiresAt = now.AddMinutes(_jwtSettings.ExpiryInMinutes);
 
             // Act
             var accessTokenDto = _provider.GenerateJwtToken(userDto);
@@ -88,9 +88,9 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             const string expectedRefreshToken = "mocked_refresh_token";
             _generatorService.Setup(service => service.GenerateUrlSafeToken(64)).Returns(expectedRefreshToken);
             var now = new DateTimeOffset(2026, 5, 27, 16, 0, 0, TimeSpan.Zero);
-            var timeAfterExpiration = now.AddMinutes(_jwtSettings.ExpiryMinutes + 5);
+            var timeAfterExpiration = now.AddMinutes(_jwtSettings.ExpiryInMinutes + 5);
             _timeProvider.SetUtcNow(now);
-            var expectedExpiresAt = now.AddMinutes(_jwtSettings.ExpiryMinutes);
+            var expectedExpiresAt = now.AddMinutes(_jwtSettings.ExpiryInMinutes);
             var accessTokenDto = _provider.GenerateJwtToken(userDto);
 
             if (isExpired)
