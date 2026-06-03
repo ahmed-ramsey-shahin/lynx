@@ -5,6 +5,6 @@ namespace Lynx.IdentityService.Infrastructure.Settings
         public string PrivateKey { get; init; } = string.Empty;
         public string Issuer { get; init; } = string.Empty;
         public string Audience { get; init; } = string.Empty;
-        public int ExpiryMinutes { get; init; }
+        public int ExpiryInMinutes { get; init; }
     }
 }
