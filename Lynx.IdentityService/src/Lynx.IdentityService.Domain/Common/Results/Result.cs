@@ -31,11 +31,11 @@ namespace Lynx.IdentityService.Domain.Common.Results
 
 #pragma warning disable IDE0051
         [JsonConstructor]
-        private Result(TValue? value, List<Error>? errors, bool isSucess)
+        private Result(TValue? value, List<Error>? errors, bool isSuccess)
         {
-            IsSuccess = isSucess;
+            IsSuccess = isSuccess;
 
-            if (isSucess)
+            if (isSuccess)
             {
                 ArgumentNullException.ThrowIfNull(value);
                 _value = value;
