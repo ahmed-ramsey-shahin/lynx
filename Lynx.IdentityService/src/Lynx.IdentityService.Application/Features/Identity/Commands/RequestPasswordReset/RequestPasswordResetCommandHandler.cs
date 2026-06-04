@@ -1,4 +1,5 @@
 using Lynx.IdentityService.Application.Common.BackgroundJobs;
+using Lynx.IdentityService.Application.Common.Errors;
 using Lynx.IdentityService.Application.Common.Repositories;
 using Lynx.IdentityService.Application.Common.Services;
 using Lynx.IdentityService.Application.Common.Settings;
@@ -17,7 +18,8 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
         ICacheService cacheService,
         IEmailBackgroundQueue emailQueue,
         IOTPGeneratorService otpService,
-        IOptions<ClientUrlOptions> options
+        IOptions<ClientUrlOptions> options,
+        IUserService userService
     ) : IRequestHandler<RequestPasswordResetCommand, Result<Success>>
     {
         public async Task<Result<Success>> Handle(RequestPasswordResetCommand request, CancellationToken cancellationToken)
@@ -30,6 +32,13 @@ namespace Lynx.IdentityService.Application.Features.Identity.Commands.RequestPas
                     logger.LogError("No user was found with {Email}.", request.Email);
 
                 return Result.Success;
+            }
+
+            if (user.Id != userService.UserId)
+            {
+                if (logger.IsEnabled(LogLevel.Warning))
+                    logger.LogWarning("{UserId} does not have permission to reset {UserEmail} password.", userService.UserId, request.Email);
+                return ApplicationErrors.UserNotOwned;
             }
 
             if (!user.IsActivated)
