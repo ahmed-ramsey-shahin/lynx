@@ -11,7 +11,7 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__Redis=redis:6379,abortConnect=false
       - ConnectionStrings__MongoDB=mongodb://${USERS_DB_USERNAME}:${USERS_DB_PASSWORD}@users-db:27017
-      - ConnectionStrings__RabbitMQ=amqp://${IDENTITY_SVC_USER}:${IDENTITY_SVC_PASS}@rabbitmq:5672
+      - ConnectionStrings__RabbitMQ=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     depends_on:
       - rabbitmq
       - users-db
@@ -20,33 +20,6 @@ services:
       - "8080:8080"
     networks:
       - lynx-net
-  rabbitmq-setup:
-    image: curlimages/curl:latest
-    container_name: rabbitmq-setup
-    depends_on:
-      rabbitmq:
-        condition: service_started
-    networks:
-      - lynx-net
-    env_file: .env
-    command: >
-      sh -c '
-        sleep 30;
-
-        # 1. Identity Service (Write only)
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$IDENTITY_SVC_USER -d "{\"password\":\"$$IDENTITY_SVC_PASS\",\"tags\":\"\"}";
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$IDENTITY_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^\$$\",\"read\":\"^none\$$\"}";
-
-        # 2. Redirection Service (Read DeletedUsers, Write to ShortLinkVisits)
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$REDIRECTION_SVC_USER -d "{\"password\":\"$$REDIRECTION_SVC_PASS\",\"tags\":\"\"}";
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$REDIRECTION_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^\$$\",\"read\":\"^DeletedUsers\$$\"}";
-
-        # 3. Analytics Service (Read DeletedUsers, Read ShortLinkVisits)
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/users/$$ANALYTICS_SVC_USER -d "{\"password\":\"$$ANALYTICS_SVC_PASS\",\"tags\":\"\"}";
-        curl -u "$$RABBITMQ_USERNAME:$$RABBITMQ_PASSWORD" -X PUT http://rabbitmq:15672/api/permissions/%2F/$$ANALYTICS_SVC_USER -d "{\"configure\":\"^none\$$\",\"write\":\"^none\$$\",\"read\":\"^(ShortLinkVisits|DeletedUsers)\$$\"}";
-
-        echo "All microservice permissions secured successfully!";
-      '
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:3-management

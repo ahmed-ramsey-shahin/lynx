@@ -4,6 +4,22 @@
             "name": "/"
         }
     ],
+    "users": [
+        {
+            "name": "lynx-admin",
+            "password": "Lynx2026",
+            "tags": "administrator"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "lynx-admin",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ],
     "queues": [
         {
             "name": "DeletedUsers",
