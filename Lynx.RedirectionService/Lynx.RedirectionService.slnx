@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lynx.RedirectionService.Api/Lynx.RedirectionService.Api.csproj" />
+    <Project Path="src/Lynx.RedirectionService.Application/Lynx.RedirectionService.Application.csproj" />
+    <Project Path="src/Lynx.RedirectionService.Contracts/Lynx.RedirectionService.Contracts.csproj" />
+    <Project Path="src/Lynx.RedirectionService.Domain/Lynx.RedirectionService.Domain.csproj" />
+    <Project Path="src/Lynx.RedirectionService.Infrastructure/Lynx.RedirectionService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lynx.RedirectionService.Application.UnitTests/Lynx.RedirectionService.Application.UnitTests.csproj" />
+    <Project Path="tests/Lynx.RedirectionService.Domain.UnitTests/Lynx.RedirectionService.Domain.UnitTests.csproj" />
+    <Project Path="tests/Lynx.RedirectionService.Infrastructure.Tests/Lynx.RedirectionService.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
