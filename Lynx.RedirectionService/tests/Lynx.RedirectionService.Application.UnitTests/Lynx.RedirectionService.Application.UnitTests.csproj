@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Lynx.RedirectionService.Application\Lynx.RedirectionService.Application.csproj" />
+  </ItemGroup>
+
 </Project>
