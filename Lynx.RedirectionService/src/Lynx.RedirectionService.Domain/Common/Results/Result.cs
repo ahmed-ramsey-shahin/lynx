@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Lynx.RedirectionService.Domain.Common.Results.Abstractions;
 
 namespace Lynx.RedirectionService.Domain.Common.Results
 {
