@@ -24,7 +24,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             _publisherMock.Setup(mock => mock.Publish(It.IsAny<DomainEvent>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             _timeProvider = new FakeTimeProvider();
-            _userRepository = new UserRepository(fixture.MongoClient, _publisherMock.Object);
+            _userRepository = new UserRepository(fixture.MongoClient, _publisherMock.Object, _timeProvider);
             _database = fixture.MongoClient.GetDatabase(DbConstants.DbName);
             _database.DropCollection(DbConstants.UserTableName);
             MongoDbIndexConfiguration.ConfigureUniqueIndexesAsync(fixture.MongoClient).GetAwaiter().GetResult();

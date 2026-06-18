@@ -10,17 +10,20 @@ namespace Lynx.IdentityService.Infrastructure.Data
         private readonly IMongoCollection<User> _users;
         private readonly IMongoClient _client;
         private readonly IPublisher _publisher;
+        private readonly TimeProvider _timeProvider;
 
-        public UserRepository(IMongoClient client, IPublisher publisher)
+        public UserRepository(IMongoClient client, IPublisher publisher, TimeProvider timeProvider)
         {
             _client = client;
             var database = _client.GetDatabase(DbConstants.DbName);
             _users = database.GetCollection<User>(DbConstants.UserTableName);
             _publisher = publisher;
+            _timeProvider = timeProvider;
         }
 
         public async Task<bool> AddAsync(User user, CancellationToken cancellationToken = default)
         {
+            user.CreatedAt = _timeProvider.GetUtcNow();
             await _users.InsertOneAsync(user, null, cancellationToken);
 
             foreach (var evt in user.Events)
@@ -86,6 +89,7 @@ namespace Lynx.IdentityService.Infrastructure.Data
 
         public async Task<bool> UpdateAsync(User user, CancellationToken cancellationToken = default)
         {
+            user.UpdatedAt = _timeProvider.GetUtcNow();
             var result = await _users.ReplaceOneAsync(
                 u => u.Id == user.Id,
                 user,
