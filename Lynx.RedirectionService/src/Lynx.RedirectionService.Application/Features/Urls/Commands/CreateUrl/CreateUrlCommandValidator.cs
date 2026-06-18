@@ -3,7 +3,7 @@ using Lynx.RedirectionService.Domain.Urls;
 
 namespace Lynx.RedirectionService.Application.Features.Urls.Commands.CreateUrl
 {
-    public class CreateUrlCommandValidator : AbstractValidator<CreateUrlCommand>
+    public sealed class CreateUrlCommandValidator : AbstractValidator<CreateUrlCommand>
     {
         public CreateUrlCommandValidator()
         {
