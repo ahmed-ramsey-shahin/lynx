@@ -8,6 +8,6 @@ namespace Lynx.RedirectionService.Application.Common.Repositories
         Task<bool> AliasExistsAsync(string alias, CancellationToken cancellationToken=default);
         Task<Url?> GetUrlById(Guid id, CancellationToken cancellationToken=default);
         Task<bool> AddAsync(Url url, CancellationToken cancellationToken=default);
-        Task<bool> DeleteUrlByAlias(string alias, CancellationToken cancellationToken=default);
+        Task<bool> UpdateUrl(Url url, CancellationToken cancellationToken=default);
     }
 }
