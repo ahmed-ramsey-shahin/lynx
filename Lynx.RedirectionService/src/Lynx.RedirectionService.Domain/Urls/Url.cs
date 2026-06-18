@@ -23,7 +23,28 @@ namespace Lynx.RedirectionService.Domain.Urls
 
         public static Result<Url> Create(Guid id, string longUrl, string alias, DateTimeOffset expirationDate)
         {
+            if (Guid.Empty == id)
+            {
+                return UrlErrors.IdRequired;
+            }
+
+            if (string.IsNullOrWhiteSpace(longUrl))
+            {
+                return UrlErrors.UrlRequired;
+            }
+
+            if (string.IsNullOrWhiteSpace(alias))
+            {
+                return UrlErrors.AliasRequired;
+            }
+
             return new Url(id, longUrl, alias, expirationDate);
+        }
+
+        public Result<Deleted> Delete()
+        {
+            IsDeleted = true;
+            return Result.Deleted;
         }
     }
 }
