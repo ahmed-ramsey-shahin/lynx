@@ -10,6 +10,7 @@ using Lynx.IdentityService.Application.Features.Identity.Commands.GenerateToken;
 using Lynx.IdentityService.Application.Features.Identity.Commands.PasswordReset;
 using Lynx.IdentityService.Application.Features.Identity.Commands.RefreshToken;
 using Lynx.IdentityService.Application.Features.Identity.Commands.RequestPasswordReset;
+using Lynx.IdentityService.Application.Features.Identity.Queries.GetJwks;
 using Lynx.IdentityService.Application.Features.Identity.Queries.GetUser;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -174,6 +175,13 @@ namespace Lynx.IdentityService.Api.Controllers
                 ExpiredAccessToken = request.ExpiredAccessToken,
                 RefreshToken = request.RefreshToken
             }, cancellationToken);
+            return result.Match(Ok, Problem);
+        }
+
+        [HttpGet("Jwk")]
+        public async Task<IActionResult> GetJwk()
+        {
+            var result = await sender.Send(new GetJwksQuery());
             return result.Match(Ok, Problem);
         }
     }
