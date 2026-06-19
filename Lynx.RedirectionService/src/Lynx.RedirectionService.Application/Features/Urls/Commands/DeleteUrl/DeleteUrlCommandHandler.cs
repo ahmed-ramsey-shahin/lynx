@@ -13,7 +13,7 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Commands.DeleteUrl
     {
         public async Task<Result<Deleted>> Handle(DeleteUrlCommand request, CancellationToken cancellationToken)
         {
-            var url = await urlRepository.GetUrlById(request.UrlId, cancellationToken);
+            var url = await urlRepository.GetUrlByIdAsync(request.UrlId, cancellationToken);
 
             if (url is null)
             {
@@ -33,7 +33,7 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Commands.DeleteUrl
                 return deletionResult.Errors!;
             }
 
-            await urlRepository.UpdateUrl(url, cancellationToken);
+            await urlRepository.UpdateUrlAsync(url, cancellationToken);
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Url {UrlId} deleted successfully.", url.Id);
             return Result.Deleted;

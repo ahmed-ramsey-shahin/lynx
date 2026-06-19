@@ -14,7 +14,7 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Queries.GetUrlByAlia
     {
         public async Task<Result<UrlDto>> Handle(GetUrlByAliasQuery request, CancellationToken cancellationToken)
         {
-            var url = await urlRepository.GetUrlByAlias(request.Alias);
+            var url = await urlRepository.GetUrlByAliasAsync(request.Alias, cancellationToken);
 
             if (url is null)
             {

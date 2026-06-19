@@ -1,20 +1,30 @@
 using FluentAssertions;
 using Lynx.RedirectionService.Domain.Urls;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Lynx.RedirectionService.Domain.UnitTests
 {
     public class UrlTests
     {
+        private FakeTimeProvider _timeProvider;
+
+        public UrlTests()
+        {
+            _timeProvider = new FakeTimeProvider();
+            _timeProvider.SetUtcNow(new DateTimeOffset(2026, 6, 19, 6, 26, 30, TimeSpan.Zero));
+        }
+
         [Fact]
         public void UrlCreate_Should_ReturnValidUrl_When_ParametersAreValid()
         {
             // Arrange
             var id = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var longUrl = "very_long_url";
             var alias = "short_alias";
 
             // Act
-            var creationResult = Url.Create(id, longUrl, alias, DateTimeOffset.UtcNow);
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
 
             // Assert
             creationResult.Should().NotBeNull();
@@ -28,11 +38,12 @@ namespace Lynx.RedirectionService.Domain.UnitTests
         {
             // Arrange
             var id = Guid.Empty;
+            var userId = Guid.NewGuid();
             var longUrl = "very_long_url";
             var alias = "short_alias";
 
             // Act
-            var creationResult = Url.Create(id, longUrl, alias, DateTimeOffset.UtcNow);
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
 
             // Assert
             creationResult.Errors.Should().ContainSingle()
@@ -46,10 +57,11 @@ namespace Lynx.RedirectionService.Domain.UnitTests
         {
             // Arrange
             var id = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var alias = "short_alias";
 
             // Act
-            var creationResult = Url.Create(id, longUrl, alias, DateTimeOffset.UtcNow);
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
 
             // Assert
             creationResult.Errors.Should().ContainSingle()
@@ -63,10 +75,11 @@ namespace Lynx.RedirectionService.Domain.UnitTests
         {
             // Arrange
             var id = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var longUrl = "very_long_url";
 
             // Act
-            var creationResult = Url.Create(id, longUrl, alias, DateTimeOffset.UtcNow);
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
 
             // Assert
             creationResult.Errors.Should().ContainSingle()
@@ -78,11 +91,12 @@ namespace Lynx.RedirectionService.Domain.UnitTests
         {
             // Arrange
             var id = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var longUrl = "very_long_url";
             var alias = "short_alias";
 
             // Act
-            var creationResult = Url.Create(id, longUrl, alias, DateTimeOffset.UtcNow);
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
             creationResult.Value.Delete();
 
             // Assert

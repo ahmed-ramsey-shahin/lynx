@@ -5,8 +5,10 @@ namespace Lynx.RedirectionService.Domain.Urls
     public static class UrlErrors
     {
         public static Error IdRequired => Error.Validation("Url.IdRequired", "Url ID is required.");
+        public static Error UserIdRequired => Error.Validation("Url.UserIdRequired", "User ID is required.");
         public static Error UrlRequired => Error.Validation("Url.UrlRequired", "The original url is required.");
         public static Error AliasRequired => Error.Validation("Url.AliasRequired", "The alias is required.");
         public static Error UrlInvalid => Error.Validation("Url.UrlInvalid", "The url is invalid");
+        public static Error ExpirationDateInvalid => Error.Validation("Url.ExpirationDateInvalid", "The expiration date can not be in the past");
     }
 }

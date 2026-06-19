@@ -30,9 +30,11 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Commands.CreateUrl
 
             var urlCreationResult = Url.Create(
                 Guid.NewGuid(),
+                request.UserId,
                 request.LongUrl,
                 alias,
-                timeProvider.GetUtcNow().AddDays(expirationInDays)
+                timeProvider.GetUtcNow().AddDays(expirationInDays),
+                timeProvider
             );
 
             if (urlCreationResult.IsError)

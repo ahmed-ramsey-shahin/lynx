@@ -6,6 +6,7 @@ namespace Lynx.RedirectionService.Domain.Urls
     public sealed class Url : EventfulEntity
     {
         public Guid Id { get; private set; }
+        public Guid UserId { get; private set; }
         public string LongUrl { get; private set; } = null!;
         public string Alias { get; private set; } = null!;
         public DateTimeOffset ExpirationDate { get; private set; }
@@ -13,17 +14,23 @@ namespace Lynx.RedirectionService.Domain.Urls
         private Url()
         {}
 
-        private Url(Guid id, string longUrl, string alias, DateTimeOffset expirationDate)
+        private Url(Guid id, Guid userId, string longUrl, string alias, DateTimeOffset expirationDate)
         {
             Id = id;
+            UserId = userId;
             LongUrl = longUrl;
             Alias = alias;
             ExpirationDate = expirationDate;
         }
 
-        public static Result<Url> Create(Guid id, string longUrl, string alias, DateTimeOffset expirationDate)
+        public static Result<Url> Create(Guid id, Guid userId, string longUrl, string alias, DateTimeOffset expirationDate, TimeProvider timeProvider)
         {
             if (Guid.Empty == id)
+            {
+                return UrlErrors.IdRequired;
+            }
+
+            if (Guid.Empty == userId)
             {
                 return UrlErrors.IdRequired;
             }
@@ -38,11 +45,21 @@ namespace Lynx.RedirectionService.Domain.Urls
                 return UrlErrors.AliasRequired;
             }
 
-            return new Url(id, longUrl, alias, expirationDate);
+            if (expirationDate < timeProvider.GetUtcNow())
+            {
+                return UrlErrors.ExpirationDateInvalid;
+            }
+
+            return new Url(id, userId, longUrl, alias, expirationDate);
         }
 
         public Result<Deleted> Delete()
         {
+            if (IsDeleted)
+            {
+                return Result.Deleted;
+            }
+
             IsDeleted = true;
             return Result.Deleted;
         }
