@@ -50,6 +50,23 @@ namespace Lynx.RedirectionService.Domain.UnitTests
                 .Which.Code.Should().Be(UrlErrors.IdRequired.Code);
         }
 
+        [Fact]
+        public void UrlCreate_Should_ReturnUserIdRequiredError_When_UserIdIsEmpty()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var userId = Guid.Empty;
+            var longUrl = "very_long_url";
+            var alias = "short_alias";
+
+            // Act
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddDays(1), _timeProvider);
+
+            // Assert
+            creationResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UrlErrors.UserIdRequired.Code);
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
@@ -84,6 +101,23 @@ namespace Lynx.RedirectionService.Domain.UnitTests
             // Assert
             creationResult.Errors.Should().ContainSingle()
                 .Which.Code.Should().Be(UrlErrors.AliasRequired.Code);
+        }
+
+        [Fact]
+        public void UrlCreate_Should_ReturnExpirartionDateInvalid_When_ExpirationDateIsInThePast()
+        {
+            // Arrange
+            var id = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var longUrl = "very_long_url";
+            var alias = "short_alias";
+
+            // Act
+            var creationResult = Url.Create(id, userId, longUrl, alias, _timeProvider.GetUtcNow().AddMinutes(-1), _timeProvider);
+
+            // Assert
+            creationResult.Errors.Should().ContainSingle()
+                .Which.Code.Should().Be(UrlErrors.ExpirationDateInvalid.Code);
         }
 
         [Fact]

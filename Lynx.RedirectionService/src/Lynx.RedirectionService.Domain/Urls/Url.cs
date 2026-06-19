@@ -32,7 +32,7 @@ namespace Lynx.RedirectionService.Domain.Urls
 
             if (Guid.Empty == userId)
             {
-                return UrlErrors.IdRequired;
+                return UrlErrors.UserIdRequired;
             }
 
             if (string.IsNullOrWhiteSpace(longUrl))
