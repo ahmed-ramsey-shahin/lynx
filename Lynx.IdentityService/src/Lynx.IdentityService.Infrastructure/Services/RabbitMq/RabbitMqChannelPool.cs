@@ -6,7 +6,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
     public interface IRabbitMqChannelPool : IAsyncDisposable
     {
         ValueTask<IChannel> GetChannelAsync(CancellationToken cancellationToken=default);
-        void ReturnChannel(IChannel channel);
+        ValueTask ReturnChannel(IChannel channel);
     }
 
     public class RabbitMqChannelPool(IRabbitMqConnectionManager connManager, int maxPoolSize=30) : IRabbitMqChannelPool
@@ -40,7 +40,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
             }
         }
 
-        public void ReturnChannel(IChannel channel)
+        public async ValueTask ReturnChannel(IChannel channel)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
                 }
                 else
                 {
-                    channel.DisposeAsync();
+                    await channel.DisposeAsync();
                 }
             }
             finally

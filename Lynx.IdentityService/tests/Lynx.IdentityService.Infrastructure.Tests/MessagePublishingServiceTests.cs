@@ -31,7 +31,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             }
             finally
             {
-                _channelPool.ReturnChannel(channel);
+                await _channelPool.ReturnChannel(channel);
             }
         }
 
@@ -57,7 +57,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             }
             finally
             {
-                _channelPool.ReturnChannel(channel);
+                await _channelPool.ReturnChannel(channel);
             }
         }
 
@@ -90,7 +90,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             }
             finally
             {
-                _channelPool.ReturnChannel(channel);
+                await _channelPool.ReturnChannel(channel);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
             }
             finally
             {
-                _channelPool.ReturnChannel(channel);
+                await _channelPool.ReturnChannel(channel);
             }
         }
     }

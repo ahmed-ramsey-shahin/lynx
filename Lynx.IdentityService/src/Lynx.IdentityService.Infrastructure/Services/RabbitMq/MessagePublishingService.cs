@@ -31,7 +31,7 @@ namespace Lynx.IdentityService.Infrastructure.Services.RabbitMq
             }
             finally
             {
-                channelPool.ReturnChannel(channel);
+                await channelPool.ReturnChannel(channel);
             }
         }
 

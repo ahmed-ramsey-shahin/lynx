@@ -40,7 +40,7 @@ namespace Lynx.IdentityService.Infrastructure.Tests
                     var channel = await _channelPool.GetChannelAsync();
                     acquiredChannels.Add(channel);
                     await Task.Delay(Random.Shared.Next(5, 20));
-                    _channelPool.ReturnChannel(channel);
+                    await _channelPool.ReturnChannel(channel);
                 }));
             }
             var act = async() => await Task.WhenAll(tasks);
