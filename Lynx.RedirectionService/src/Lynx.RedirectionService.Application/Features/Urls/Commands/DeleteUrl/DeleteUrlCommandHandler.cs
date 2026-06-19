@@ -23,6 +23,13 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Commands.DeleteUrl
                 return ApplicationErrors.UrlDoesNotExist;
             }
 
+            if (url.UserId != request.UserId)
+            {
+                if (logger.IsEnabled(LogLevel.Warning))
+                    logger.LogWarning("User {UserId} attempted to delete Url {UrlId} without ownership.", request.UserId, request.UrlId);
+                return ApplicationErrors.UrlNotOwned;
+            }
+
             var deletionResult = url.Delete();
 
             if (deletionResult.IsError)
@@ -34,8 +41,10 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Commands.DeleteUrl
             }
 
             await urlRepository.UpdateUrlAsync(url, cancellationToken);
+
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Url {UrlId} deleted successfully.", url.Id);
+
             return Result.Deleted;
         }
     }

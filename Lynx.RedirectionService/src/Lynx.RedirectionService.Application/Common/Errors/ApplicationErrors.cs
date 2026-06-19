@@ -7,5 +7,6 @@ namespace Lynx.RedirectionService.Application.Common.Errors
         public static Error AliasAlreadyExists => Error.Validation("Url.AiasAlreadyExists", "This alias already exists. Please choose a different one.");
         public static Error UrlDoesNotExist => Error.NotFound("Url.UrlDoesNotExist", "The required url does not exist.");
         public static Error AliasGenerationFailed => Error.Failure("Url.AliasGenerationFailed", "Failed to generate alias for the link.");
+        public static Error UrlNotOwned => Error.Failure("Url.UrlNotOwned", "You do not have permission to access this URL.");
     }
 }

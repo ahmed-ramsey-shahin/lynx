@@ -26,6 +26,7 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Queries.GetUrlByAlia
 
             return new UrlDto
             {
+                Id = url.Id,
                 Alias = url.Alias,
                 LongUrl = url.LongUrl,
                 ExpiresAt = url.ExpirationDate
