@@ -6,7 +6,7 @@ namespace Lynx.RedirectionService.Domain.UnitTests
 {
     public class UrlTests
     {
-        private FakeTimeProvider _timeProvider;
+        private readonly FakeTimeProvider _timeProvider;
 
         public UrlTests()
         {
