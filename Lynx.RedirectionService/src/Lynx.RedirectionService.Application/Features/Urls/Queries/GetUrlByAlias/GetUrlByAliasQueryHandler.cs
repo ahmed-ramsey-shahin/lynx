@@ -4,6 +4,7 @@ using Lynx.RedirectionService.Application.Common.Services;
 using Lynx.RedirectionService.Application.Features.Urls.Dtos;
 using Lynx.RedirectionService.Domain.Common.Results;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Lynx.RedirectionService.Application.Features.Urls.Queries.GetUrlByAlias
@@ -12,7 +13,7 @@ namespace Lynx.RedirectionService.Application.Features.Urls.Queries.GetUrlByAlia
         IUrlRepository urlRepository,
         ILogger<GetUrlByAliasQueryHandler> logger,
         TimeProvider timeProvider,
-        IMessagePublishingService messagePublishingService
+        [FromKeyedServices("background")] IMessagePublishingService messagePublishingService
     ) : IRequestHandler<GetUrlByAliasQuery, Result<UrlDto>>
     {
         public async Task<Result<UrlDto>> Handle(GetUrlByAliasQuery request, CancellationToken cancellationToken)
