@@ -105,7 +105,7 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
         }
 #endregion // ADD_ASYNC_TESTS
 
-#region GET_USER_BY_ID_ASYNC
+#region GET_URL_BY_ID_ASYNC
         [Fact]
         public async Task GetUrlByIdAsync_Should_ReturnUrl_WhenIdIsCorrect()
         {
@@ -156,6 +156,59 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
             // Assert
             userResult.Should().BeNull();
         }
-#endregion // GET_USER_BY_ID_TESTS
+#endregion // GET_URL_BY_ID_TESTS
+
+#region GET_URL_BY_ALIAS_ASYNC
+        [Fact]
+        public async Task GetUrlByAliasAsync_Should_ReturnUrl_WhenAliasIsCorrect()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var userResult = await _urlRepository.GetUrlByAliasAsync(alias);
+
+            // Assert
+            userResult.Should().NotBeNull();
+            userResult.Id.Should().Be(urlId);
+        }
+
+        [Fact]
+        public async Task GetUrlByAliasAsync_Should_ReturnNull_WhenAliasIsNotFound()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var userResult = await _urlRepository.GetUrlByAliasAsync(Guid.NewGuid().ToString());
+
+            // Assert
+            userResult.Should().BeNull();
+        }
+#endregion // GET_URL_BY_ALIAS_TESTS
     }
 }
