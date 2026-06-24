@@ -104,5 +104,58 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
                 .Which.Id.Should().Be(urlId1);
         }
 #endregion // ADD_ASYNC_TESTS
+
+#region GET_USER_BY_ID_ASYNC
+        [Fact]
+        public async Task GetUrlByIdAsync_Should_ReturnUrl_WhenIdIsCorrect()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var userResult = await _urlRepository.GetUrlByIdAsync(urlId);
+
+            // Assert
+            userResult.Should().NotBeNull();
+            userResult.Id.Should().Be(urlId);
+        }
+
+        [Fact]
+        public async Task GetUrlByIdAsync_Should_ReturnNull_WhenIdIsNotFound()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var userResult = await _urlRepository.GetUrlByIdAsync(Guid.NewGuid());
+
+            // Assert
+            userResult.Should().BeNull();
+        }
+#endregion // GET_USER_BY_ID_TESTS
     }
 }
