@@ -262,5 +262,37 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
             result.Should().BeFalse();
         }
 #endregion // ALIAS_EXISTS_TESTS
+
+#region UPDATE_ASYNC_TESTS
+        [Fact]
+        public async Task UpdateAsync_Should_UpdateTheUrl_WhenParametersAreValid()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+            url.Delete();
+
+            // Act
+            var result = await _urlRepository.UpdateUrlAsync(url, default);
+
+            // Assert
+            result.Should().BeTrue();
+            var collection = _database.GetCollection<Url>(DbConstants.UrlsTableName);
+            var foundInDb = await collection.Find(u => u.Id == url.Id).FirstOrDefaultAsync();
+            foundInDb.Should().NotBeNull();
+            foundInDb.IsDeleted.Should().BeTrue();
+        }
+#endregion // UPDATE_ASYNC_TESTS
     }
 }
