@@ -61,7 +61,7 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
         }
 
         [Fact]
-        public async Task AddAsync_Should_ThrowException_WhenEmailIsNotUnique()
+        public async Task AddAsync_Should_ThrowException_WhenAliasIsNotUnique()
         {
             // Arrange
             Guid urlId1 = Guid.NewGuid();
@@ -210,5 +210,57 @@ namespace Lynx.RedirectionService.Infrastructure.Tests
             userResult.Should().BeNull();
         }
 #endregion // GET_URL_BY_ALIAS_TESTS
+
+#region ALIAS_EXISTS_TESTS
+        [Fact]
+        public async Task AliasExistsAsync_Should_ReturnTrue_WhenAliasAlreadyExists()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var result = await _urlRepository.AliasExistsAsync(url.Alias);
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task AliasExistsAsync_Should_ReturnFalse_WhenAliasDoesNotExist()
+        {
+            // Arrange
+            Guid urlId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            const string longUrl = "long url";
+            const string alias = "short url";
+            var url = Url.Create(
+                urlId,
+                userId,
+                longUrl,
+                alias,
+                _timeProvider.GetUtcNow().AddDays(13),
+                _timeProvider
+            ).Value;
+            await _urlRepository.AddAsync(url);
+
+            // Act
+            var result = await _urlRepository.AliasExistsAsync(Guid.NewGuid().ToString());
+
+            // Assert
+            result.Should().BeFalse();
+        }
+#endregion // ALIAS_EXISTS_TESTS
     }
 }
