@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Lynx.RedirectionService.Api;
+using Lynx.RedirectionService.Api.Services;
 using Lynx.RedirectionService.Application;
 using Lynx.RedirectionService.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -12,6 +13,7 @@ builder.Services
     .AddInfrastructureLayer(config)
     .AddHttpContextAccessor()
     .AddControllers();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
