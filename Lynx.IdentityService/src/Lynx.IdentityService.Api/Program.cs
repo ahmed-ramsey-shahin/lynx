@@ -22,10 +22,10 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    // app.UseHangfireDashboard("/hangfire", new DashboardOptions
-    // {
-    //     Authorization = [],
-    // });
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        Authorization = [],
+    });
 }
 else
 {
