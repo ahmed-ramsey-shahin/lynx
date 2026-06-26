@@ -76,7 +76,7 @@ namespace Lynx.RedirectionService.Infrastructure
                         ValidAudience = config["Authentication:Audience"],
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                        IssuerSigningKeyResolver = (_, _, kid, _) =>
                         {
                             var jwks = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
                             var keys = jwks.GetSigningKeys();
@@ -123,7 +123,8 @@ namespace Lynx.RedirectionService.Infrastructure
                 .AddRedisCache(redisConnectionString)
                 .AddSingleton(TimeProvider.System)
                 .AddDynamicJwkAuthentication(config)
-                .AddLynxHealthChecks(redisConnectionString);
+                .AddLynxHealthChecks(redisConnectionString)
+                .AddTransient<IGenerateAliasService, GenerateAliasService>();
             return services;
         }
     }
