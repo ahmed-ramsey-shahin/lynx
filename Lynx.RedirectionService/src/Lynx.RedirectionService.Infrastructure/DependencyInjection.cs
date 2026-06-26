@@ -60,10 +60,11 @@ namespace Lynx.RedirectionService.Infrastructure
         {
             var baseIdentityAddress = config["Authentication:IdentityServiceUrl"] ?? throw new InfrastructureConfigurationException("Authentication:IdentityServiceUrl");
             var jwksUrl = $"{baseIdentityAddress}/api/auth/jwk";
+            var documentRetriever = new HttpDocumentRetriever { RequireHttps = false };
             var configManager = new ConfigurationManager<JsonWebKeySet>(
                 jwksUrl,
                 new JwksRetriever(),
-                new HttpClient()
+                documentRetriever
             );
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
