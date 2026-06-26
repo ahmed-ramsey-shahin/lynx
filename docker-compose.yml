@@ -8,7 +8,7 @@ services:
       - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
+      - ASPNETCORE_URLS=http://+:8081
       - ConnectionStrings__Redis=redis:6379,abortConnect=false
       - ConnectionStrings__MongoDB=mongodb://${USERS_DB_USERNAME}:${USERS_DB_PASSWORD}@users-db:27017
       - ConnectionStrings__RabbitMQ=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672
