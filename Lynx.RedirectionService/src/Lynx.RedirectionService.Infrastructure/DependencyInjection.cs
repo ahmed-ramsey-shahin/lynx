@@ -10,6 +10,9 @@ using Lynx.RedirectionService.Infrastructure.Data;
 using Lynx.RedirectionService.Application.Common.Repositories;
 using StackExchange.Redis;
 using Lynx.RedirectionService.Infrastructure.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Lynx.RedirectionService.Infrastructure
 {
@@ -51,6 +54,38 @@ namespace Lynx.RedirectionService.Infrastructure
             services.AddKeyedScoped<IMessagePublishingService, BackgroundMessagePublishingService>("background");
             services.AddKeyedScoped<IMessagePublishingService, MessagePublishingService>("instant");
             return services;
+        }
+
+        public static IServiceCollection AddDynamicJwkAuthentication(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddHttpClient("IdentityService", client => client.BaseAddress = new Uri(config["Authentication:IdentityServiceUrl"] ?? throw new InfrastructureConfigurationException("Authentication:IdentityServiceUrl")));
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = config["Authentication:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = config["Authentication:Audience"],
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKeyResolver = (_, _, _, _) => FetchPublicKeyFromIdentityService(services)
+                    };
+                });
+            services.AddAuthorization();
+            return services;
+        }
+
+        private static IEnumerable<SecurityKey> FetchPublicKeyFromIdentityService(IServiceCollection services)
+        {
+            var provider = services.BuildServiceProvider();
+            var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+            var client = httpClientFactory.CreateClient("IdentityService");
+            var publicKeyPem = client.GetStringAsync("/api/auth/jwk").GetAwaiter().GetResult();
+            var rsa = RSA.Create();
+            rsa.ImportFromPem(publicKeyPem);
+            return [new RsaSecurityKey(rsa)];
         }
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
