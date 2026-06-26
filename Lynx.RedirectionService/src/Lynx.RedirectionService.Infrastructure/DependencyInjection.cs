@@ -11,7 +11,6 @@ using Lynx.RedirectionService.Application.Common.Repositories;
 using StackExchange.Redis;
 using Lynx.RedirectionService.Infrastructure.Services;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Protocols;
 
@@ -97,16 +96,6 @@ namespace Lynx.RedirectionService.Infrastructure
             return services;
         }
 
-        private static IEnumerable<SecurityKey> FetchPublicKeyFromIdentityService(IServiceCollection services)
-        {
-            var provider = services.BuildServiceProvider();
-            var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-            var client = httpClientFactory.CreateClient("IdentityService");
-            var publicKeyPem = client.GetStringAsync("/api/auth/jwk").GetAwaiter().GetResult();
-            var rsa = RSA.Create();
-            rsa.ImportFromPem(publicKeyPem);
-            return [new RsaSecurityKey(rsa)];
-        }
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
             var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings:MongoDB");
