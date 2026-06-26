@@ -51,12 +51,12 @@ namespace Lynx.RedirectionService.Infrastructure
             services.AddSingleton<IMessagePublishingService, MessagePublishingService>();
             services.AddSingleton<IMessageChannel, MessageChannel>();
             services.AddHostedService<RabbitMqPublisherBackgroundService>();
-            services.AddKeyedScoped<IMessagePublishingService, BackgroundMessagePublishingService>("background");
-            services.AddKeyedScoped<IMessagePublishingService, MessagePublishingService>("instant");
+            services.AddKeyedSingleton<IMessagePublishingService, BackgroundMessagePublishingService>("background");
+            services.AddKeyedSingleton<IMessagePublishingService, MessagePublishingService>("instant");
             return services;
         }
 
-        public static IServiceCollection AddDynamicJwkAuthentication(this IServiceCollection services, IConfiguration config)
+        private static IServiceCollection AddDynamicJwkAuthentication(this IServiceCollection services, IConfiguration config)
         {
             services.AddHttpClient("IdentityService", client => client.BaseAddress = new Uri(config["Authentication:IdentityServiceUrl"] ?? throw new InfrastructureConfigurationException("Authentication:IdentityServiceUrl")));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,7 +95,8 @@ namespace Lynx.RedirectionService.Infrastructure
             services.AddRabbitMQ(rabbitMqConnectionString)
                 .AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
-                .AddSingleton(TimeProvider.System);
+                .AddSingleton(TimeProvider.System)
+                .AddDynamicJwkAuthentication(config);
             return services;
         }
     }

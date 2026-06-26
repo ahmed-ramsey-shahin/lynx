@@ -178,7 +178,7 @@ namespace Lynx.IdentityService.Api.Controllers
             return result.Match(Ok, Problem);
         }
 
-        [HttpGet("Jwk")]
+        [HttpGet("jwk")]
         public async Task<IActionResult> GetJwk()
         {
             var result = await sender.Send(new GetJwksQuery());
