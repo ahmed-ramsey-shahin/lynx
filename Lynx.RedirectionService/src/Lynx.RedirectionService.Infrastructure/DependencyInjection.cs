@@ -13,6 +13,7 @@ using Lynx.RedirectionService.Infrastructure.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Lynx.RedirectionService.Infrastructure
 {
@@ -58,7 +59,13 @@ namespace Lynx.RedirectionService.Infrastructure
 
         private static IServiceCollection AddDynamicJwkAuthentication(this IServiceCollection services, IConfiguration config)
         {
-            services.AddHttpClient("IdentityService", client => client.BaseAddress = new Uri(config["Authentication:IdentityServiceUrl"] ?? throw new InfrastructureConfigurationException("Authentication:IdentityServiceUrl")));
+            var baseIdentityAddress = config["Authentication:IdentityServiceUrl"] ?? throw new InfrastructureConfigurationException("Authentication:IdentityServiceUrl");
+            var jwksUrl = $"{baseIdentityAddress}/api/auth/jwk";
+            var configManager = new ConfigurationManager<JsonWebKeySet>(
+                jwksUrl,
+                new JwksRetriever(),
+                new HttpClient()
+            );
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -70,7 +77,20 @@ namespace Lynx.RedirectionService.Infrastructure
                         ValidAudience = config["Authentication:Audience"],
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKeyResolver = (_, _, _, _) => FetchPublicKeyFromIdentityService(services)
+                        IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+                        {
+                            var jwks = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+                            var keys = jwks.GetSigningKeys();
+
+                            if(!string.IsNullOrEmpty(kid) && !keys.Any(k => k.KeyId == kid))
+                            {
+                                configManager.RequestRefresh();
+                                jwks = configManager.GetConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+                                keys = jwks.GetSigningKeys();
+                            }
+
+                            return keys;
+                        }
                     };
                 });
             services.AddAuthorization();
