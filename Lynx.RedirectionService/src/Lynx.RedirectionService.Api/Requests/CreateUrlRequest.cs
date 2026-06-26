@@ -5,6 +5,5 @@ namespace Lynx.RedirectionService.Api.Requests
         public string LongUrl { get; init; } = null!;
         public string? CustomAlias { get; init; }
         public int? ExpirationInDays { get; init; }
-        public string IdempotencyKey { get; init; } = null!;
     }
 }

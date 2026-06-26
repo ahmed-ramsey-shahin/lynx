@@ -28,7 +28,7 @@ namespace Lynx.RedirectionService.Api.Controllers
         [Authorize]
         public async Task<IActionResult> CreateUrl(
             [FromServices] IUserService userService,
-            [FromHeader(Name = "Idempotency-Key")] string IdempotencyKey,
+            [FromHeader(Name = "Idempotency-Key")] string idempotencyKey,
             [FromBody] CreateUrlRequest request
         )
         {
@@ -38,7 +38,7 @@ namespace Lynx.RedirectionService.Api.Controllers
                 UserId = userService.UserId!.Value,
                 CustomAlias = request.CustomAlias,
                 ExpirationInDays = request.ExpirationInDays,
-                IdempotencyKey = IdempotencyKey
+                IdempotencyKey = idempotencyKey
             };
             var result = await sender.Send(command);
             return result.Match(
