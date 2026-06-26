@@ -96,6 +96,23 @@ namespace Lynx.RedirectionService.Infrastructure
             return services;
         }
 
+        private static IServiceCollection AddLynxHealthChecks(this IServiceCollection services, string redisConnectionString)
+        {
+            services.AddHealthChecks()
+                .AddMongoDb(
+                    name: "MongoDB",
+                    tags: ["ready", "database"]
+                ).AddRabbitMQ(
+                    name: "RabbitMQ",
+                    tags: ["ready", "message-broker"]
+                ).AddRedis(
+                    redisConnectionString,
+                    name: "Redis",
+                    tags: ["ready", "cache"]
+                );
+            return services;
+        }
+
         public static IServiceCollection AddInfrastructureLayer(this IServiceCollection services, IConfiguration config)
         {
             var mongoDbConnectionString = config.GetConnectionString("MongoDB") ?? throw new InfrastructureConfigurationException("ConnectionStrings:MongoDB");
@@ -105,7 +122,8 @@ namespace Lynx.RedirectionService.Infrastructure
                 .AddMongoDb(mongoDbConnectionString)
                 .AddRedisCache(redisConnectionString)
                 .AddSingleton(TimeProvider.System)
-                .AddDynamicJwkAuthentication(config);
+                .AddDynamicJwkAuthentication(config)
+                .AddLynxHealthChecks(redisConnectionString);
             return services;
         }
     }
