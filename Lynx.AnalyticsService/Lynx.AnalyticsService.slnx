@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lynx.AnalyticsService.Api/Lynx.AnalyticsService.Api.csproj" />
+    <Project Path="src/Lynx.AnalyticsService.Application/Lynx.AnalyticsService.Application.csproj" />
+    <Project Path="src/Lynx.AnalyticsService.Domain/Lynx.AnalyticsService.Domain.csproj" />
+    <Project Path="src/Lynx.AnalyticsService.Infrastructure/Lynx.AnalyticsService.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Lynx.AnalyticsService.Application.UnitTests/Lynx.AnalyticsService.Application.UnitTests.csproj" />
+    <Project Path="tests/Lynx.AnalyticsService.Domain.UnitTests/Lynx.AnalyticsService.Domain.UnitTests.csproj" />
+    <Project Path="tests/Lynx.AnalyticsService.Infrastructure.Tests/Lynx.AnalyticsService.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
