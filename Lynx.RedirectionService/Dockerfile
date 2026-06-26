@@ -32,6 +32,6 @@ ENV ASPNETCORE_ENVIRONMENT=development
 
 WORKDIR /app
 COPY --from=build /app .
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8081
+ENV ASPNETCORE_URLS=http://+:8081
 ENTRYPOINT [ "dotnet", "Lynx.RedirectionService.Api.dll" ]
